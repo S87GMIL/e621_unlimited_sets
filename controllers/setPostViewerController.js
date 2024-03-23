@@ -57,15 +57,20 @@ class SetPostViewerController {
 
     #createPostItem(post) {
         const postContainer = document.createElement("article");
+        postContainer.dataset.id = post.postId;
         postContainer.className = "post-preview post-status-has-parent post-rating-explicit";
 
         const postLink = document.createElement("a");
-        postLink.href = `/posts/`;
+        postLink.href = `/posts/${post.postId}`;
         postContainer.appendChild(postLink);
 
+        const pictureContainer = document.createElement("picture");
+        postLink.appendChild(pictureContainer);
+
         const postPreview = document.createElement("img");
-        postPreview.src = post.file.url;
-        postLink.appendChild(postPreview);
+        postPreview.src = post.preview.url;
+        postPreview.className = "has-cropped-true";
+        pictureContainer.appendChild(postPreview);
 
         return postContainer;
     }

@@ -34,22 +34,33 @@
     if (!currentUserId)
         throw Error("The user isn't currently logged in!");
 
-    if (path.startsWith("/posts/"))
+    if (path.startsWith("/posts/") && path.length > 7) {
         new PostController();
+        return;
+    }
 
-    if (path.startsWith("/posts"))
+    if (path.startsWith("/posts")) {
         new PostOverviewController();
 
-    if (path === "/posts" && searchParameters.includes("tags=custom_set:"))
-        new SetPostViewerController();
+        if (searchParameters.includes("tags=custom_set:"))
+            new SetPostViewerController();
 
-    if (path.startsWith("post_sets") && searchParameters === `?search[creator_id]=${currentUserId}`)
+        return;
+    }
+
+    if (path.startsWith("/post_sets") && searchParameters === `?search[creator_id]=${currentUserId}`) {
         new SetViewerController();
+        return;
+    }
 
-    if (path === "/post_sets/new")
+    if (path === "/post_sets/new") {
         new SetCreatorController();
+        return;
+    }
 
-    if (path.startsWith("/custom_post_sets/"))
+    if (path.startsWith("/custom_sets/")) {
         new CustomSetController(path.split("/").pop());
+        return;
+    }
 
 })();

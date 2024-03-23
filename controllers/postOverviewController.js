@@ -50,8 +50,10 @@ class PostOverviewController {
         console.info("Replacing all posts with clones and a custom event hanlder");
 
         const postContainer = document.querySelector("#posts-container");
-        Array.from(postContainer.children).forEach(postTile => {
+        Array.from(postContainer.querySelectorAll("article")).forEach(postTile => {
             const postClone = postTile.cloneNode(true);
+            postClone.querySelector("a").href = "javascript: void(0)";
+
             postTile.replaceWith(postClone);
             postClone.addEventListener("click", this.#onPostClicked.bind(this));
         });
