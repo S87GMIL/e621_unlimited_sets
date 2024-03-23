@@ -30,7 +30,7 @@ class SetViewerController {
                 const idCell = document.createElement("td");
                 const idLink = document.createElement("a");
                 idLink.href = `/posts?tags=custom_set:${setInstance.getId()}`;
-                idLink.innerText = setInstance.getLabel();
+                idLink.innerText = setInstance.getId();
                 idCell.appendChild(idLink);
                 tableRow.appendChild(idCell);
 
