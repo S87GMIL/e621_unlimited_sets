@@ -126,9 +126,16 @@ class SetPostViewerController {
     }
 
     #filterPosts(posts) {
-        const filters = document.querySelector("#tags").value.split(" ");
-        //TODO: Implement filter logic to filter the custom set posts!
+        const filters = document.querySelector("#tags").value.split(" ").filter(tag => !tag.startsWith("custom_set"));
+        //TODO: Implement a more advanced filter logic to filter the custom set posts!
 
-        return posts;
+        if (filters.length === 0)
+            return posts;
+
+        return posts.filter(post => {
+            const tags = post.tags;
+            const postTags = [...tags.general, ...tags.artist, ...tags.copyright, ...tags.character, ...tags.species, ...tags.meta, ...tags.lore];
+            return postTags.includes(...filters);
+        });
     }
 }
