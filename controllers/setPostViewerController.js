@@ -126,7 +126,7 @@ class SetPostViewerController {
     }
 
     #filterPosts(posts) {
-        const filters = document.querySelector("#tags").value.split(" ").filter(tag => !tag.startsWith("custom_set"));
+        const filters = document.querySelector("#tags").value.split(" ").filter(tag => !tag.startsWith("custom_set") && !!tag);
         //TODO: Implement a more advanced filter logic to filter the custom set posts!
 
         if (filters.length === 0)
