@@ -21,13 +21,15 @@ class PostOverviewController {
     }
 
     async #displayCustomSets() {
-        const userSetDropdown = document.querySelector("#set-id");
         const modeDropdown = document.querySelector("#mode-box-mode");
         const selectedMode = modeDropdown.value;
         if (selectedMode !== "add-to-set" && selectedMode !== "remove-from-set")
             return;
 
+        await this.#waitUntilPostsAreLoaded();
         this.#replacePostEventHandlers();
+
+        const userSetDropdown = document.querySelector("#set-id");
 
         await this.#waitUntilSetsAreLoaded(userSetDropdown);
 
@@ -65,7 +67,8 @@ class PostOverviewController {
             const selectedMode = document.querySelector("#mode-box-mode").value;
             const selectedSetOption = setDropdown.options[setDropdown.selectedIndex];
 
-            const postId = event.target.parentElement.parentElement.parentElement.dataset.id;
+            const postArticleElement = event.target.parentElement.parentElement.parentElement;
+            const postId = postArticleElement.dataset.id;
 
             switch (selectedMode) {
                 case "add-to-set":
@@ -85,11 +88,12 @@ class PostOverviewController {
                     } else {
                         await ApiHelper.removePostFromSet(setDropdown.value, postId)
                     }
+                    postArticleElement.style.display = "none";
 
                     UIHelper.displaySuccessMessage(`The post has been removed from the set '${selectedSetOption.innerText}'`);
                     break;
                 case "view":
-                    window.location.assign(`https://e621.net/posts/${setId}`);
+                    window.location.assign(`https://e621.net/posts/${postId}`);
                     break;
                 case "edit":
                     //This required more work than I'm willing to invest right now, so I guess just reload and try again ...
@@ -106,6 +110,7 @@ class PostOverviewController {
             }
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
+            console.error(error);
         }
     }
 
@@ -121,8 +126,38 @@ class PostOverviewController {
                     }
                 });
             };
+
+            if (setDropdown.options.length > 0 && setDropdown.options[0].innerText !== "Loading...") {
+                resolve();
+                return;
+            }
+
             const oObserver = new MutationObserver(observerCallback);
             oObserver.observe(setDropdown, { attributes: true, childList: true, subtree: true });
+        });
+    }
+
+    #waitUntilPostsAreLoaded() {
+        return new Promise(resolve => {
+            const observerCallback = function (mutationsList, observer) {
+                mutationsList.forEach(mutation => {
+                    if (mutation.type === 'childList') {
+                        if (mutation.target.children.length > 0 && mutation.target.children[0].tagName !== "P") {
+                            oObserver.disconnect();
+                            resolve()
+                        }
+                    }
+                });
+            };
+
+            const postContainer = document.querySelector("#posts-container");
+            if (postContainer.children.length > 0 && postContainer.children[0].tagName !== "P") {
+                resolve();
+                return;
+            }
+
+            const oObserver = new MutationObserver(observerCallback);
+            oObserver.observe(postContainer, { attributes: true, childList: true, subtree: true });
         });
     }
 }
