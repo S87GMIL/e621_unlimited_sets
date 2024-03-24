@@ -9,10 +9,13 @@
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\apiHelpder.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\uiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\userHelper.js
+// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\abstractClasses\setEditingBaseController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\classes\user.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\classes\customSetStorage.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\classes\postSet.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\classes\userSets.js
+// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\controllers\customSetPostListController.js
+// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\controllers\customSetEditController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\controllers\postController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\controllers\postOverviewController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\controllers\setPostViewerController.js
@@ -55,6 +58,16 @@
 
     if (path === "/post_sets/new") {
         new SetCreatorController();
+        return;
+    }
+
+    if (path.startsWith("/custom_sets/post_list/")) {
+        new CustomSetPostListController(path.split("/").pop());
+        return;
+    }
+
+    if (path.startsWith("/custom_sets/edit/")) {
+        new CustomSetEditController(path.split("/").pop());
         return;
     }
 

@@ -2,6 +2,7 @@ class SetPostViewerController {
 
     constructor() {
         this.#displayPosts();
+        UIHelper.substituteE6Image();
     }
 
     async #getUser() {
