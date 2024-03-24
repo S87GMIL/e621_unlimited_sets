@@ -69,6 +69,8 @@ class CustomSetEditController extends SetEditingBaseController {
             const newId = document.getElementById("id").value;
             const newDescription = document.getElementById("description").value;
 
+            let idChanged = false;
+
             if (newId.includes(" ") || !newId) {
                 UIHelper.displayErrorMessage("The set short name can't contain any spaces!")
                 return;
@@ -82,13 +84,17 @@ class CustomSetEditController extends SetEditingBaseController {
             if (this._setInstance.getLabel() !== newName)
                 this._setInstance.setLabel(newName);
 
-            if (this._setInstance.getId() !== newId)
-                this._setInstance.setId(newId);
-
             if (this._setInstance.getDescription() !== newDescription)
                 this._setInstance.setDescription(newDescription);
 
+            if (this._setInstance.getId() !== newId) {
+                this._setInstance.setId(newId);
+                idChanged = true;
+            }
+
             UIHelper.displaySuccessMessage("The set has successfully been updated!");
+            if (idChanged)
+                window.location.assign(`https://e621.net/custom_sets/edit/${newId}`);
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
         }
