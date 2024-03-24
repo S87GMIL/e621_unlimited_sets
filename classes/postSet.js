@@ -18,12 +18,24 @@ class PostSet {
         return this._setId;
     }
 
+    setId(newId) {
+        this._customSetStorageInstance.changeSetId(this._setId, newId);
+    }
+
     getLabel() {
         return this._setDefinition.label;
     }
 
+    setLabel(newLabel) {
+        this._customSetStorageInstance.changeSetLabel(this._setId, newLabel);
+    }
+
     getDescription() {
         return this._setDefinition.description;
+    }
+
+    setDescription(newDescription) {
+        this._customSetStorageInstance.changeSetDescription(this._setId, newDescription);
     }
 
     getPosts() {
@@ -40,12 +52,11 @@ class PostSet {
 
     async addPost(postId) {
         const createdPost = await this._customSetStorageInstance.addPostToSet(this._setId, postId);
-        this._setDefinition.posts.push(createdPost);
+        return createdPost;
     }
 
     removePost(postId) {
         this._customSetStorageInstance.removePostFromSet(this._setId, postId);
-        this._setDefinition.posts = this._setDefinition.posts.filter(post => post.postId !== postId);
     }
 
     isPostInSet(postId) {

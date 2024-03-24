@@ -106,7 +106,7 @@ class CustomSetStorage {
             throw Error(`The post '${postId}' has already been added to set '${customSets[setId].label}'`)
 
         const postData = await ApiHelper.getPost(postId);
-        const createdPost = await this.#createPostMetadata(postId, postData);
+        const createdPost = this.#createPostMetadata(postId, postData);
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
@@ -156,6 +156,45 @@ class CustomSetStorage {
 
     hasSetBeenDeleted(setId) {
         return !!this.#getSet(setId).deleted;
+    }
+
+    changeSetLabel(setId, newLabel) {
+        const customSets = this.#getCustomSets();
+        if (!customSets[setId] || customSets[setId].deleted)
+            throw Error(`No set with the ID '${setId}' exists!`);
+
+        customSets[setId].label = newLabel;
+        customSets[setId].changedOn = Date.now();
+
+        GM_setValue(this.#createUsersetsKey(), customSets);
+    }
+
+    changeSetDescription(setId, newDescription) {
+        const customSets = this.#getCustomSets();
+        if (!customSets[setId] || customSets[setId].deleted)
+            throw Error(`No set with the ID '${setId}' exists!`);
+
+        customSets[setId].description = newDescription;
+        customSets[setId].changedOn = Date.now();
+
+        GM_setValue(this.#createUsersetsKey(), customSets);
+    }
+
+    changeSetId(setId, newId) {
+        const customSets = this.#getCustomSets();
+        if (!customSets[setId] || customSets[setId].deleted)
+            throw Error(`No set with the ID '${setId}' exists!`);
+
+        if (customSets[newId])
+            throw Error(`A set with the ID '${newId}' already exists!`);
+
+        customSets[setId].setId = newId;
+        customSets[setId].changedOn = Date.now();
+
+        customSets[newId] = customSets[setId];
+        delete customSets[setId];
+
+        GM_setValue(this.#createUsersetsKey(), customSets);
     }
 
 }

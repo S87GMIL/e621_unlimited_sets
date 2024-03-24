@@ -1,6 +1,8 @@
 class PostOverviewController {
 
     constructor() {
+        this._postsReplaced = false;
+
         this.#attachModeChangeHandler();
 
         const modeDropdown = document.querySelector("#mode-box-mode");
@@ -26,8 +28,10 @@ class PostOverviewController {
         if (selectedMode !== "add-to-set" && selectedMode !== "remove-from-set")
             return;
 
-        await this.#waitUntilPostsAreLoaded();
-        this.#replacePostEventHandlers();
+        if (!this._postsReplaced) {
+            await this.#waitUntilPostsAreLoaded();
+            this.#replacePostEventHandlers();
+        }
 
         const userSetDropdown = document.querySelector("#set-id");
 
@@ -49,7 +53,8 @@ class PostOverviewController {
     }
 
     #replacePostEventHandlers() {
-        console.info("Replacing all posts with clones and a custom event hanlder");
+        console.info("Replacing all posts with clones and a custom event handler");
+        this._postsReplaced = true;
 
         const postContainer = document.querySelector("#posts-container");
         Array.from(postContainer.querySelectorAll("article")).forEach(postTile => {
@@ -110,7 +115,6 @@ class PostOverviewController {
             }
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
-            console.error(error);
         }
     }
 
