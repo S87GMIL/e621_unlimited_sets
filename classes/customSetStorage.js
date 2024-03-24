@@ -33,7 +33,7 @@ class CustomSetStorage {
             throw Error("No post ID was passed!");
 
         return {
-            postId: postId,
+            postId: Number(postId),
             createdOn: Date.now(),
             tags: postData.tags,
             preview: postData.preview,
@@ -140,14 +140,14 @@ class CustomSetStorage {
         if (!customSets[setId] || customSets[setId].deleted)
             throw Error(`No set with the ID '${setId}' exists!`);
 
-        customSets[setId].posts = customSets[setId].posts.filter(post => post.postId !== postId);
+        customSets[setId].posts = customSets[setId].posts.filter(post => post.postId !== Number(postId));
         customSets[setId].changedOn = Date.now();
 
         GM_setValue(this.#createUsersetsKey(), customSets);
     }
 
     isPostAlreadyInSet(setId, postId) {
-        return this.#getSet(setId).posts.some(post => post.postId === postId);
+        return this.#getSet(setId).posts.some(post => post.postId === Number(postId));
     }
 
     doesSetAlreadyExist(setId) {
