@@ -29,7 +29,7 @@ class SetPostViewerController {
 
         const setInstance = new UserSets(UserHelper.getCurrentUserId()).getSet(customsetIds[0]);
         if (!setInstance)
-            throw Error(`No custom set with the ID ${customsetIds[0]} was found!`);
+            UIHelper.displayErrorMessage(`No offline set found with the ID '${customsetIds[0]}'!`);
 
         return setInstance;
     }
