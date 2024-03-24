@@ -13,7 +13,7 @@ class SetPostViewerController {
     }
 
     #getCurrentPage() {
-        return new URLSearchParams(window.location.search).get('page') || 1;
+        return Number(new URLSearchParams(window.location.search).get('page') || 1);
     }
 
     #getCustomSet() {
@@ -48,9 +48,8 @@ class SetPostViewerController {
         const currentPage = this.#getCurrentPage();
         const postsPerPage = userInstance.getPostsPerPage();
 
-        const beginIndex = currentPage === 1 ? 0 : currentPage * postsPerPage;
         const filteredPosts = this.#filterPosts(customSet.getPosts());
-        const pagePosts = filteredPosts.slice(beginIndex, beginIndex + postsPerPage);
+        const pagePosts = filteredPosts.slice((currentPage - 1) * postsPerPage, (currentPage * postsPerPage + postsPerPage) - 1);
 
         this.#displayPages(Math.ceil(filteredPosts.length / postsPerPage) || 1, currentPage);
         pagePosts.forEach(post => postsContainer.appendChild(this.#createPostItem(post)));
