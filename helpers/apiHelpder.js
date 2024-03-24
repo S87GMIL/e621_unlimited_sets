@@ -44,7 +44,7 @@ class ApiHelper {
     }
 
     static async getUserInformation(userId) {
-        let response = await this.#performGetRequest(`https://e621.net/users/${userId}.json`);
+        const response = await this.#performGetRequest(`https://e621.net/users/${userId}.json`);
         if (!response || !response.name)
             throw Error(`User with ID '${userId}' couldn't be loaded!`);
 
@@ -52,7 +52,7 @@ class ApiHelper {
     }
 
     static async addPostToSet(setId, postId) {
-        let response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/add_posts.json`,
+        const response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/add_posts.json`,
             {
                 post_ids: [postId]
             });
@@ -63,7 +63,7 @@ class ApiHelper {
     }
 
     static async removePostFromSet(setId, postId) {
-        let response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/remove_posts.json`,
+        const response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/remove_posts.json`,
             {
                 post_ids: [postId]
             });
@@ -74,7 +74,7 @@ class ApiHelper {
     }
 
     static async addPostToFavorites(postId) {
-        let response = await this.#performPostRequest(`https://e621.net/favorites.json`,
+        const response = await this.#performPostRequest(`https://e621.net/favorites.json`,
             {
                 post_ids: postId
             });
@@ -85,10 +85,24 @@ class ApiHelper {
     }
 
     static async removePostFromFavorites(postId) {
-        let response = await this.#performDeleteRequest(`https://e621.net/favorites/${postId}.json`);
+        const response = await this.#performDeleteRequest(`https://e621.net/favorites/${postId}.json`);
         if (!response || !response.name)
             throw Error(`Post '${postId}' could not be removed from favorites!`);
 
         return response;
+    }
+
+    static async loadBulkPost(postIds) {
+        if (postIds.length === 0)
+            throw Error("No post IDs provided!");
+
+        if (postIds.length > 100)
+            throw Error(`Too many post IDs provided, a maximum of 100 are allowed, actually received '${postIds.length}'!`);
+
+        const response = await this.#performGetRequest(`https://e621.net/posts.json?tags=id:${postIds.join(",")}`);
+        if (!response || !response.posts)
+            throw Error(`Posts couldn't be loaded in bolk!`);
+
+        return response.posts;
     }
 }

@@ -1,5 +1,6 @@
 class CustomSetStorage {
     CUSTOM_SET_KEY_PREFIX = "customSet_";
+    DELETION_MODE = true;
 
     constructor(userId) {
         if (!userId)
@@ -27,11 +28,9 @@ class CustomSetStorage {
         return customSet[setId];
     }
 
-    async #createPostMetadata(postId) {
+    #createPostMetadata(postId, postData) {
         if (!postId)
             throw Error("No post ID was passed!");
-
-        const postData = await ApiHelper.getPost(postId);
 
         return {
             postId: postId,
@@ -63,7 +62,7 @@ class CustomSetStorage {
             throw Error(`Nom set ID was passed!`);
 
         let customSets = this.#getCustomSets();
-        if (customSets[setId])
+        if (customSets[setId] && (!this.DELETION_MODE && customSets[setId].deleted))
             throw Error(`A set with the ID '${setId}' already exists!`);
 
         if (!label)
@@ -88,8 +87,12 @@ class CustomSetStorage {
         if (!customSets[setId])
             throw Error(`No set with the ID '${setId}' exists!`);
 
-        customSets[setId].deleted = true;
-        customSets[setId].deletedOn = Date.now();
+        if (!this.DELETION_MODE) {
+            customSets[setId].deleted = true;
+            customSets[setId].deletedOn = Date.now();
+        } else {
+            delete customSets[setId];
+        }
 
         GM_setValue(this.#createUsersetsKey(), customSets);
     }
@@ -102,13 +105,34 @@ class CustomSetStorage {
         if (this.isPostAlreadyInSet(setId, postId))
             throw Error(`The post '${postId}' has already been added to set '${customSets[setId].label}'`)
 
-        const createdPost = await this.#createPostMetadata(postId);
+        const postData = await ApiHelper.getPost(postId);
+        const createdPost = await this.#createPostMetadata(postId, postData);
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
         GM_setValue(this.#createUsersetsKey(), customSets);
 
         return createdPost;
+    }
+
+    updatePosts(setId, updatedPosts) {
+        const customSets = this.#getCustomSets();
+        if (!customSets[setId] || customSets[setId].deleted)
+            throw Error(`No set with the ID '${setId}' exists!`);
+
+        customSets[setId].posts = [];
+
+        updatedPosts.forEach(async postData => {
+            const createdPost = this.#createPostMetadata(postData.id, postData);
+
+            if (this.isPostAlreadyInSet(setId, postData.id))
+                throw Error(`The post '${postData.id}' has already been added to set '${customSets[setId].label}'`)
+
+            customSets[setId].posts.push(createdPost);
+        })
+
+        customSets[setId].changedOn = Date.now();
+        GM_setValue(this.#createUsersetsKey(), customSets);
     }
 
     removePostFromSet(setId, postId) {

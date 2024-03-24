@@ -52,4 +52,12 @@ class PostSet {
         return this._setDefinition.posts.some(post => post.postId === postId);
     }
 
+    updatePosts(updatedPosts) {
+        this._customSetStorageInstance.updatePosts(this.getId(), updatedPosts);
+    }
+
+    delete() {
+        this._customSetStorageInstance.deleteSet(this.getId());
+    }
+
 }
