@@ -1,6 +1,6 @@
 class CustomSetController extends SetEditingBaseController {
 
-    _createUiElements() {
+    _createSetSpecificElements() {
         document.title = `Set - ${this._setInstance.getLabel()} - e621`;
 
         const mainPage = document.querySelector("#page");

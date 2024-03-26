@@ -15,7 +15,7 @@ class CustomSetStorage {
 
     #getCustomSets() {
         if (!this._customSets)
-            this._customSets = GM_getValue(this.#createUsersetsKey()) || {};
+            this._customSets = StorageHelper.getValue(this.#createUsersetsKey()) || {};
 
         return this._customSets;
     }
@@ -77,7 +77,7 @@ class CustomSetStorage {
             posts: []
         };
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
 
         return customSets[setId];
     }
@@ -94,7 +94,7 @@ class CustomSetStorage {
             delete customSets[setId];
         }
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
     async addPostToSet(setId, postId) {
@@ -110,7 +110,7 @@ class CustomSetStorage {
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
 
         return createdPost;
     }
@@ -132,7 +132,7 @@ class CustomSetStorage {
         })
 
         customSets[setId].changedOn = Date.now();
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
     removePostFromSet(setId, postId) {
@@ -143,7 +143,7 @@ class CustomSetStorage {
         customSets[setId].posts = customSets[setId].posts.filter(post => post.postId !== Number(postId));
         customSets[setId].changedOn = Date.now();
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
     isPostAlreadyInSet(setId, postId) {
@@ -166,7 +166,7 @@ class CustomSetStorage {
         customSets[setId].label = newLabel;
         customSets[setId].changedOn = Date.now();
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
     changeSetDescription(setId, newDescription) {
@@ -177,7 +177,7 @@ class CustomSetStorage {
         customSets[setId].description = newDescription;
         customSets[setId].changedOn = Date.now();
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
     changeSetId(setId, newId) {
@@ -194,7 +194,7 @@ class CustomSetStorage {
         customSets[newId] = customSets[setId];
         delete customSets[setId];
 
-        GM_setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
     }
 
 }

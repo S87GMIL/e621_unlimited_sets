@@ -40,7 +40,7 @@ class User {
     }
 
     async getAvatarPost() {
-        return await ApiHelper.getInstance().loadPost(this.getAvatarId());
+        return await ApiHelper.loadPost(this.getAvatarId());
     }
 
     canRepalcePosts() {
