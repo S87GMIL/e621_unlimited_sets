@@ -42,6 +42,10 @@ class PostSet {
         return this._setDefinition.posts;
     }
 
+    getPostAmount() {
+        return this._setDefinition.posts.length;
+    }
+
     getCreationDate() {
         return new Date(this._setDefinition.createdOn);
     }

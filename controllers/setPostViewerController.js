@@ -16,6 +16,13 @@ class SetPostViewerController {
         return Number(new URLSearchParams(window.location.search).get('page') || 1);
     }
 
+    #getUserSetInstance() {
+        if (!this._userSetInstance)
+            this._userSetInstance = new UserSets(UserHelper.getCurrentUserId());
+
+        return this._userSetInstance;
+    }
+
     #getCustomSet() {
         const filters = document.querySelector("#tags").value.split(" ");
         const customsetIds = [];
@@ -27,7 +34,7 @@ class SetPostViewerController {
         if (customsetIds.length === 0)
             return;
 
-        const setInstance = new UserSets(UserHelper.getCurrentUserId()).getSet(customsetIds[0]);
+        const setInstance = this.#getUserSetInstance().getSet(customsetIds[0]);
         if (!setInstance)
             UIHelper.displayErrorMessage(`No offline set found with the ID '${customsetIds[0]}'!`);
 
@@ -48,7 +55,7 @@ class SetPostViewerController {
         const currentPage = this.#getCurrentPage();
         const postsPerPage = userInstance.getPostsPerPage();
 
-        const filteredPosts = this.#filterPosts(customSet.getPosts());
+        const filteredPosts = this.#filterPosts(customSet);
         const pagePosts = filteredPosts.slice((currentPage - 1) * postsPerPage, (currentPage * postsPerPage + postsPerPage) - 1);
 
         this.#displayPages(Math.ceil(filteredPosts.length / postsPerPage) || 1, currentPage);
@@ -125,17 +132,57 @@ class SetPostViewerController {
         rightArrowLink.appendChild(rightArrowIcon);
     }
 
-    #filterPosts(posts) {
-        const filters = document.querySelector("#tags").value.split(" ").filter(tag => !tag.startsWith("custom_set") && !!tag);
+    #filterPosts(setInstance) {
         //TODO: Implement a more advanced filter logic to filter the custom set posts!
 
-        if (filters.length === 0)
+        let posts = setInstance.getPosts();
+        const filteredTags = document.querySelector("#tags").value.split(" ").filter(tag => tag !== `custom_set:${setInstance.getId()}` && !!tag);
+
+        if (filteredTags.length === 0)
+            return posts;
+
+        let setPostIdArrays = [];
+
+        filteredTags
+            .filter(tag => tag.startsWith("custom_set:"))
+            .forEach(customSetTag => {
+                const customsetId = customSetTag.split(":").pop();
+                const setInstance = this.#getUserSetInstance().getSet(customsetId);
+                if (!setInstance)
+                    UIHelper.displayErrorMessage(`No offline set found with the ID '${customsetId}'!`);
+
+                if (setInstance?.getPostAmount() > 0)
+                    setPostIdArrays[setPostIdArrays.length] = setInstance.getPosts().map(post => post.postId);
+            });
+
+        if (setPostIdArrays.length > 0) {
+            const commonPostIds = this.#findCommonSetPosts(setPostIdArrays, posts.map(post => post.postId));
+            posts = posts.filter(post => commonPostIds.includes(post.postId));
+        }
+
+        const simpleFiltertagArray = filteredTags.filter(tag => !tag.startsWith("custom_set:"));
+        if (simpleFiltertagArray.length === 0)
             return posts;
 
         return posts.filter(post => {
             const tags = post.tags;
             const postTags = [...tags.general, ...tags.artist, ...tags.copyright, ...tags.character, ...tags.species, ...tags.meta, ...tags.lore];
-            return postTags.includes(...filters);
+            return postTags.includes(...simpleFiltertagArray);
         });
+    }
+
+    #findCommonSetPosts(postIdArrays, originalPosts) {
+        const commonPostIds = new Set(originalPosts);
+
+        for (let index = 0; index < postIdArrays.length; index++) {
+            const currentArray = postIdArrays[index];
+            commonPostIds.forEach(postId => {
+                if (!currentArray.includes(postId)) {
+                    commonPostIds.delete(postId);
+                }
+            });
+        }
+
+        return Array.from(commonPostIds);
     }
 }
