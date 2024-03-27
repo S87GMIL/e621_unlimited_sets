@@ -1,11 +1,13 @@
-class SetCreatorController {
+class SetCreatorController extends SetBaseController {
 
-    constructor() {
-        this._userSetsInstance = new UserSets(UserHelper.getCurrentUserId());
-        this.#addCustomSetCreationButton();
+    #getUserSetInstance() {
+        if (!this._userSetsInstance)
+            this._userSetsInstance = new UserSets(UserHelper.getCurrentUserId());
+
+        return this._userSetsInstance;
     }
 
-    #addCustomSetCreationButton() {
+    _createUiElements() {
         const formContainer = document.querySelector("#a-new > div");
         const createCustomContainer = document.createElement("div");
         formContainer.appendChild(createCustomContainer);
@@ -40,7 +42,7 @@ class SetCreatorController {
             return;
 
         try {
-            const createdSet = this._userSetsInstance.createSet(idInput.value, labelInput.value, descriptionInput.value);
+            const createdSet = this.#getUserSetInstance().createSet(idInput.value, labelInput.value, descriptionInput.value);
             this.#navigateToSet(createdSet.getId());
         } catch (error) {
             this._errorStrip.innerText = error.message;

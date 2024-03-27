@@ -1,6 +1,8 @@
 class SettingsController extends SetBaseController {
 
     _createUiElements() {
+        this._clearMainPage();
+
         document.title = `S87's offline sets - settings - e621`;
 
         const title = document.createElement("h2");
@@ -9,6 +11,7 @@ class SettingsController extends SetBaseController {
 
         const sectionElement = document.createElement('div');
         sectionElement.className = 'section';
+        this._getMainPageElement().appendChild(sectionElement);
 
         const formElement = document.createElement('form');
         formElement.className = 'simple_form';
@@ -134,8 +137,6 @@ class SettingsController extends SetBaseController {
         gitHint.innerText = `These GitHub settings will be used to automatically backup your sets to the define GitHub repository, make sure, that you choose an empty repositry that isn't used for anything else.
         The repository URL as well as your access token will only be saved locally in your browser.`;
         formElement.appendChild(gitHint);
-
-        this._getMainPageElement().appendChild(sectionElement);
     }
 
     #loadFile(uplaodedFile, progressBar) {

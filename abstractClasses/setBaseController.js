@@ -1,11 +1,13 @@
 class SetBaseController {
 
-    constructor() {
+    constructor(substituteE6Icon = true) {
         this._addItemsToToolbar(this.#getStandardToolbarItems());
-        this.#clearMainPage();
         this._createUiElements();
 
-        UIHelper.substituteE6Image();
+        this._menuCleared = false;
+
+        if (substituteE6Icon)
+            UIHelper.substituteE6Image();
     }
 
     _createUiElements() {
@@ -21,16 +23,17 @@ class SetBaseController {
             { text: 'List', href: '/post_sets' },
             { text: 'New', href: '/post_sets/new' },
             { text: 'Help', href: '/help/sets' },
-            { text: 'Mine', href: `/post_sets?search[creator_id]=${UserHelper.getCurrentUserId()}`, hidden: !!UserHelper.getCurrentUserId() }
+            { text: 'Mine', href: `/post_sets?search[creator_id]=${UserHelper.getCurrentUserId()}`, hidden: !!UserHelper.getCurrentUserId() },
+            { text: 'Invites', href: '/post_set_maintainers' },
+            { text: '|', type: 'seperator' },
+            { text: "S87's offline set settings", href: "/custom_sets/settings", },
         ];
     }
 
     _addItemsToToolbar(items) {
         const menu = document.querySelector("#nav > menu.secondary");
-        const menuSpacer = document.querySelector("#subnav-height-placeholder");
-
-        if (menuSpacer)
-            menuSpacer.style.display = "none";
+        if (!this._menuCleared)
+            menu.innerHTML = "";
 
         items.forEach(item => {
             const li = document.createElement('li');
@@ -58,7 +61,7 @@ class SetBaseController {
         });
     }
 
-    #clearMainPage() {
+    _clearMainPage() {
         const mainPage = this._getMainPageElement();
         const noticeDivs = Array.from(mainPage.children).slice(0, 2);
         mainPage.innerHTML = "";

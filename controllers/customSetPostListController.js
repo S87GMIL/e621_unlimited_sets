@@ -1,6 +1,8 @@
 class CustomSetPostListController extends SetEditingBaseController {
 
     _createSetSpecificElements() {
+        this._clearMainPage();
+
         document.title = `Set Post List - ${this._setInstance.getLabel()} - e621`;
 
         const div = document.createElement('div');

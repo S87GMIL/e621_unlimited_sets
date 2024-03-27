@@ -1,6 +1,8 @@
 class CustomSetEditController extends SetEditingBaseController {
 
     _createSetSpecificElements() {
+        this._clearMainPage();
+        
         document.title = `Edit Set - ${this._setInstance.getLabel()} - e621`;
 
         const title = document.createElement("h2");

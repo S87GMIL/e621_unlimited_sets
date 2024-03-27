@@ -1,6 +1,8 @@
-class SetViewerController {
+class SetViewerController extends SetBaseController {
 
     constructor() {
+        super(false);
+
         this.#displayCustomSets();
     }
 

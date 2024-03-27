@@ -14,10 +14,7 @@ class CustomSetStorage {
     }
 
     #getCustomSets() {
-        if (!this._customSets)
-            this._customSets = StorageHelper.getValue(this.#createUsersetsKey()) || {};
-
-        return this._customSets;
+        return this._customSets = StorageHelper.getValue(this.#createUsersetsKey()) || {};
     }
 
     #getSet(setId) {

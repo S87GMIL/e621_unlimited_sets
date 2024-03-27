@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         e621 unlimited offline sets
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.5.0
 // @description  Allows users to create an unlimited amount of sets, which are saved locally
 // @author       S87GMIL
 // @match        https://e621.net/*
