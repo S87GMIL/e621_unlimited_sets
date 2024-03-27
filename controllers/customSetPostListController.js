@@ -51,7 +51,7 @@ class CustomSetPostListController extends SetEditingBaseController {
 
     async #updateSetPosts(postIds) {
         try {
-            const updatedPosts = await this.#loadPostsInBatches(postIds);
+            const updatedPosts = await ApiHelper.loadBulkPost(postIds);
             this._setInstance.updatePosts(updatedPosts);
             UIHelper.displaySuccessMessage("All posts in the current set have been update!");
         } catch (error) {
@@ -59,18 +59,4 @@ class CustomSetPostListController extends SetEditingBaseController {
             console.error(error);
         }
     }
-
-    async #loadPostsInBatches(postIds, batch = 0, batchSize = 100) {
-        const requestPostIds = postIds.slice(batch * batchSize, (batch * batchSize + batchSize) - 1);
-
-        let loadedPosts = [];
-        if (requestPostIds.length > 0) {
-            loadedPosts = await ApiHelper.loadBulkPost(requestPostIds);
-            let response = await this.#loadPostsInBatches(postIds, batch + 1, batchSize);
-            loadedPosts = loadedPosts.concat(response);
-        }
-
-        return loadedPosts;
-    }
-
 }

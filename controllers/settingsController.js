@@ -56,11 +56,11 @@ class SettingsController extends SetBaseController {
         uploadHint.innerText = "Upload a JSON file containing offline sets";
         formElement.appendChild(uploadHint);
 
-        const uploadButton = document.createElement("button");
+        const applySetDataButton = document.createElement("button");
         const applyHint = document.createElement("p");
         fileUploader.addEventListener("change", async () => {
             progressBar.style.display = "inline";
-            uploadButton.style.display = "block";
+            applySetDataButton.style.display = "block";
             applyHint.style.display = "block";
             uploadHint.style.display = "none";
 
@@ -74,13 +74,14 @@ class SettingsController extends SetBaseController {
             progressBar.style.display = "none";
         });
 
-        uploadButton.style.marginTop = "10px";
-        uploadButton.style.display = "none";
-        uploadButton.innerText = "Apply Uploaded Sets";
-        uploadButton.className = "btn";
-        uploadButton.style.padding = "3px 8px";
-        uploadButton.addEventListener("click", this.onApplyUploadedClick.bind(this));
-        formElement.appendChild(uploadButton);
+        applySetDataButton.id = "applySetDataButton";
+        applySetDataButton.style.marginTop = "10px";
+        applySetDataButton.style.display = "none";
+        applySetDataButton.innerText = "Apply Uploaded Sets";
+        applySetDataButton.className = "btn";
+        applySetDataButton.style.padding = "3px 8px";
+        applySetDataButton.addEventListener("click", this.onApplyUploadedClick.bind(this));
+        formElement.appendChild(applySetDataButton);
 
         applyHint.style.display = "none";
         applyHint.style.marginTop = "5px";
@@ -178,7 +179,12 @@ class SettingsController extends SetBaseController {
     onDownloadPress(event) {
         event.preventDefault();
 
-        const setDataString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.#getSetStorageInstance().getRawSetData()));
+        const rawSetData = this.#getSetStorageInstance().getRawSetData();
+        Object.keys(rawSetData).forEach(setId => {
+            rawSetData[setId].posts = rawSetData[setId].posts.map(post => post.postId);
+        });
+
+        const setDataString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rawSetData));
         const donwloadAnchor = document.createElement('a');
         donwloadAnchor.setAttribute("href", setDataString);
 
@@ -203,14 +209,18 @@ class SettingsController extends SetBaseController {
         });
     }
 
-    onApplyUploadedClick(event) {
+    async onApplyUploadedClick(event) {
         event.preventDefault();
+        const button = event.target;
+        const originalButtonText = button.innerText;
 
         const setFile = this._uplaodedFile;
         if (!this._uplaodedFile) {
             UIHelper.displayErrorMessage("No file has been uploaded!");
             return;
         }
+
+        button.innerText = "Loading ...";
 
         try {
             const userSetInstance = this.#getUserSets();
@@ -230,19 +240,40 @@ class SettingsController extends SetBaseController {
             Object.keys(setFile).forEach(setId => {
                 const set = setFile[setId];
 
-                let setInstance = null;
-                if (userSetInstance.hasSet(set.setId)) {
-                    setInstance = userSetInstance.getSet(set.setId);
-                } else {
-                    setInstance = userSetInstance.createSet(set.setId, set.label, set.description);
-                }
-
-                this.#getSetStorageInstance().updateSetFromMetadata(set.setId, set);
+                if (!userSetInstance.hasSet(set.setId))
+                    userSetInstance.createSet(set.setId, set.label, set.description);
             });
+
+            await this.#updateSetPosts(setFile);
 
             UIHelper.displaySuccessMessage("Set file has successfully been loaded and applied!");
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
         }
+
+        button.innerText = originalButtonText;
+    }
+
+    async #updateSetPosts(newSetMetaData, index = 0) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const setId = Object.keys(newSetMetaData)[index];
+                if (!setId) {
+                    resolve();
+                    return;
+                }
+
+                const setMetaData = newSetMetaData[setId];
+                if (setMetaData.posts.length > 0)
+                    setMetaData.posts = await ApiHelper.loadBulkPost(setMetaData.posts);
+
+                this.#getSetStorageInstance().updateSetFromMetadata(setId, setMetaData);
+
+                await this.#updateSetPosts(newSetMetaData, index + 1);
+                resolve()
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 }

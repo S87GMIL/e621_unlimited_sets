@@ -92,17 +92,19 @@ class ApiHelper {
         return response;
     }
 
-    static async loadBulkPost(postIds) {
-        if (postIds.length === 0)
-            throw Error("No post IDs provided!");
+    static async loadBulkPost(postIds, batch = 0, batchSize = 100) {
+        const requestPostIds = postIds.slice(batch * batchSize, (batch * batchSize + batchSize) - 1);
 
-        if (postIds.length > 100)
-            throw Error(`Too many post IDs provided, a maximum of 100 are allowed, actually received '${postIds.length}'!`);
+        if (requestPostIds.length === 0)
+            return [];
 
         const response = await this.#performGetRequest(`https://e621.net/posts.json?tags=id:${postIds.join(",")}`);
         if (!response || !response.posts)
-            throw Error(`Posts couldn't be loaded in bolk!`);
+            throw Error(`Posts couldn't be loaded in bulk!`);
 
-        return response.posts;
+        let loadedPosts = response.posts;
+        loadedPosts = loadedPosts.concat(await ApiHelper.loadBulkPost(requestPostIds, batch + 1, batchSize));
+
+        return loadedPosts;
     }
 }

@@ -7,7 +7,7 @@
 // @match        https://e621.net/*
 // @icon64       file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\icon.png
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\storageHelper.js
-// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\apiHelpder.js
+// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\apiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\uiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\userHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\abstractClasses\setBaseController.js
