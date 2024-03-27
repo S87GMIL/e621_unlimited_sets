@@ -41,4 +41,12 @@ class UserSets {
         this._setInstances = this._setInstances.filter(setInstance => setInstance.getId() !== setId);
     }
 
+    hasSet(setId) {
+        try {
+            return !!this.getSet(setId);
+        } catch (error) {
+            return false;
+        }
+    }
+
 }

@@ -84,7 +84,7 @@ class PostOverviewController {
                         await ApiHelper.addPostToSet(setDropdown.value, postId)
                     }
 
-                    UIHelper.displaySuccessMessage(`The post has been added to the set '${selectedSetOption.innerText}'`);
+                    UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSetOption.innerText}'`);
                     break;
                 case "remove-from-set":
                     if (selectedSetOption.dataset.isCustomSet) {
@@ -93,9 +93,10 @@ class PostOverviewController {
                     } else {
                         await ApiHelper.removePostFromSet(setDropdown.value, postId)
                     }
-                    postArticleElement.style.display = "none";
+                    //Posts can't safely be hidden, because the user might delete them from a different set and not the one dispalyed right now
+                    //postArticleElement.style.display = "none";
 
-                    UIHelper.displaySuccessMessage(`The post has been removed from the set '${selectedSetOption.innerText}'`);
+                    UIHelper.displaySuccessMessage(`The post '${postId}' has been removed from the set '${selectedSetOption.innerText}'`);
                     break;
                 case "view":
                     window.location.assign(`https://e621.net/posts/${postId}`);
@@ -106,11 +107,11 @@ class PostOverviewController {
                     break;
                 case "add-fav":
                     await ApiHelper.addPostToFavorites(postId);
-                    UIHelper.displaySuccessMessage(`The post has been added to your favorites`);
+                    UIHelper.displaySuccessMessage(`The post '${postId}' has been added to your favorites`);
                     break;
                 case "remove-fav":
                     await ApiHelper.removePostFromFavorites(postId);
-                    UIHelper.displaySuccessMessage(`The post has been removed from your favorites`);
+                    UIHelper.displaySuccessMessage(`The post '${postId}' has been removed from your favorites`);
                     break;
             }
         } catch (error) {

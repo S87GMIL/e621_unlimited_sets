@@ -51,7 +51,7 @@ class GitRepository {
 
         this._accessToken = accessToken;
 
-        StorageHelper.setValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryUrl(), accessToken));
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryUrl(), accessToken));
     }
 
     hasAccessToken() {
@@ -68,7 +68,7 @@ class GitRepository {
 
         this._repoUrl = repositoryUrl;
 
-        StorageHelper.setValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(repositoryUrl, this.getAccessToken()));
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(repositoryUrl, this.getAccessToken()));
     }
 
     loadSetsFromRepository() {

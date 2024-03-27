@@ -41,6 +41,10 @@ class CustomSetStorage {
         }
     }
 
+    getRawSetData() {
+        return this.#getCustomSets();
+    }
+
     getUserSets() {
         const userSets = this.#getCustomSets();
 
@@ -77,8 +81,35 @@ class CustomSetStorage {
             posts: []
         };
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
 
+        return customSets[setId];
+    }
+
+    updateSetFromMetadata(setId, setMetadata) {
+        if (!setId)
+            throw Error("No set id was passed!");
+
+        if (!setMetadata)
+            throw Error("No set metadata was passed!");
+
+        const customSets = this.#getCustomSets();
+        if (!customSets[setId])
+            throw Error(`No set with the ID '${setId}' exists!`);
+
+        if (!setMetadata.setId || !setMetadata.label || !setMetadata.createdOn || !Array.isArray(setMetadata.posts))
+            throw Error(`The passed set meta data for set '${setId}' is not valid!`);
+
+        customSets[setId] = {
+            setId: setMetadata.setId,
+            label: setMetadata.label,
+            description: setMetadata.description || "",
+            createdOn: setMetadata.createdOn,
+            changedOn: setMetadata.changedOn || Date.now(),
+            posts: setMetadata.posts
+        };
+
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
         return customSets[setId];
     }
 
@@ -94,7 +125,7 @@ class CustomSetStorage {
             delete customSets[setId];
         }
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
     async addPostToSet(setId, postId) {
@@ -110,7 +141,7 @@ class CustomSetStorage {
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
 
         return createdPost;
     }
@@ -132,7 +163,7 @@ class CustomSetStorage {
         })
 
         customSets[setId].changedOn = Date.now();
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
     removePostFromSet(setId, postId) {
@@ -140,10 +171,15 @@ class CustomSetStorage {
         if (!customSets[setId] || customSets[setId].deleted)
             throw Error(`No set with the ID '${setId}' exists!`);
 
-        customSets[setId].posts = customSets[setId].posts.filter(post => post.postId !== Number(postId));
+        const filteredPosts = customSets[setId].posts.filter(post => post.postId !== Number(postId));
+
+        if (filteredPosts.length === customSets[setId].posts.length)
+            throw Error(`The set '${setId}' does not contain post '${postId}'!`);
+
+        customSets[setId].posts = filteredPosts;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
     isPostAlreadyInSet(setId, postId) {
@@ -166,7 +202,7 @@ class CustomSetStorage {
         customSets[setId].label = newLabel;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
     changeSetDescription(setId, newDescription) {
@@ -177,7 +213,7 @@ class CustomSetStorage {
         customSets[setId].description = newDescription;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
     changeSetId(setId, newId) {
@@ -194,7 +230,7 @@ class CustomSetStorage {
         customSets[newId] = customSets[setId];
         delete customSets[setId];
 
-        StorageHelper.setValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
     }
 
 }
