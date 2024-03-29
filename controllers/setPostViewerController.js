@@ -3,6 +3,21 @@ class SetPostViewerController {
     constructor() {
         this.#displayPosts();
         UIHelper.substituteE6Image();
+        this.#filterUnsupportedModes();
+    }
+
+    #filterUnsupportedModes() {
+        const modeSelect = document.querySelector("#mode-box-mode");
+        Array.from(modeSelect.options).forEach(option => {
+            if (option.value === "edit") {
+                option.style.display = "none";
+
+                if (modeSelect.value === option.value) {
+                    modeSelect.value = "view";
+                    modeSelect.dispatchEvent(new Event('change'));
+                }
+            }
+        });
     }
 
     async #getUser() {
