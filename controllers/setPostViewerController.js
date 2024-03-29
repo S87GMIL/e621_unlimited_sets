@@ -175,14 +175,30 @@ class SetPostViewerController {
             posts = posts.filter(post => commonPostIds.includes(post.postId));
         }
 
-        const simpleFiltertagArray = filteredTags.filter(tag => !tag.startsWith("custom_set:"));
-        if (simpleFiltertagArray.length === 0)
+        const mustIncludeTags = filteredTags.filter(tag => !tag.startsWith("custom_set:") && !tag.startsWith("-"));
+
+        let negativeTags = [];
+        filteredTags.forEach(tag => {
+            if (!tag.startsWith("custom_set:") && tag.startsWith("-"))
+                negativeTags.push(tag.substring(1));
+        });
+
+
+        if (mustIncludeTags.length === 0 && negativeTags.length === 0)
             return posts;
 
         return posts.filter(post => {
             const tags = post.tags;
             const postTags = [...tags.general, ...tags.artist, ...tags.copyright, ...tags.character, ...tags.species, ...tags.meta, ...tags.lore];
-            return postTags.includes(...simpleFiltertagArray);
+
+            let display = true;
+            if (!mustIncludeTags.every(tag => postTags.includes(tag)))
+                display = false;
+
+            if (postTags.includes(...negativeTags))
+                display = false;
+
+            return display;
         });
     }
 
