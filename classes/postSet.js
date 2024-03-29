@@ -5,7 +5,7 @@ class PostSet {
             throw Error("No set definition was passed!");
 
         if (!customSetStorage)
-            throw Error("No custom set storage instance was passed!");
+            throw Error("No offline set storage instance was passed!");
 
         this._setId = setDefinition.setId;
         this._customSetStorageInstance = customSetStorage;

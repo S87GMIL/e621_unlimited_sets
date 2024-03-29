@@ -59,7 +59,7 @@ class SetPostViewerController {
     async #displayPosts() {
         const customSet = this.#getCustomSet();
         if (!customSet) {
-            console.info("No custom set was queried");
+            console.info("No offline set was queried");
             return;
         }
 

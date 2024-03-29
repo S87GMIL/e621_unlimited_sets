@@ -42,7 +42,7 @@ class PostOverviewController {
         await this.#waitUntilSetsAreLoaded(userSetDropdown);
 
         const customSetGroup = document.createElement("optgroup");
-        customSetGroup.label = "Custom Sets";
+        customSetGroup.label = "Offline Sets";
         userSetDropdown.appendChild(customSetGroup);
 
         this.#getUserSetInstance()

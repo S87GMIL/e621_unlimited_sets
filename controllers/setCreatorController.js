@@ -69,7 +69,7 @@ class SetCreatorController extends SetBaseController {
 
     #navigateToSet(setId) {
         if (!setId)
-            throw Error("No custom set ID was passed!");
+            throw Error("No offline set ID was passed!");
 
         window.location.assign(`https://e621.net/custom_sets/${setId}`);
     }

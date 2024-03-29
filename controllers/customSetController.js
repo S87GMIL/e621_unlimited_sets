@@ -2,6 +2,7 @@ class CustomSetController extends SetEditingBaseController {
 
     _createSetSpecificElements() {
         document.title = `Set - ${this._setInstance.getLabel()} - e621`;
+        this._clearMainPage();
 
         const mainPage = document.querySelector("#page");
 

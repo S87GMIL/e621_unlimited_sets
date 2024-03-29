@@ -8,7 +8,7 @@ class SetEditingBaseController extends SetBaseController {
 
         this._setInstance = new UserSets(UserHelper.getCurrentUserId()).getSet(setId);
         if (!this._setInstance)
-            throw Error(`No custom set with the ID ${setId} was found!`);
+            throw Error(`No offline set with the ID ${setId} was found!`);
 
         this._addItemsToToolbar(this.#getSetEditingToolbarItems());
         this._createSetSpecificElements();
