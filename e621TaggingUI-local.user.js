@@ -5,7 +5,7 @@
 // @description  Allows users to create an unlimited amount of sets, which are saved locally
 // @author       S87GMIL
 // @match        https://e621.net/*
-// @icon64       file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\icon.png
+// @icon64       file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\e6_s87_logo.png
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\storageHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\apiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\uiHelper.js
