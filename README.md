@@ -1,7 +1,7 @@
 # Installation
 
 To install the script, you will need a user script manager like <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a>.<br>
-Once installed, simply follow this [link](https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/releases/latest/e621UnlimitedSets.user.js) to install. 
+Once installed, simply follow this [link](https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/main/e621UnlimitedSets.user.js) to install. 
 
 # Overview
 
