@@ -4,10 +4,11 @@ class PostOverviewController {
         this._postsReplaced = false;
 
         this.#attachModeChangeHandler();
+        this.#handleSelectedMode();
+    }
 
-        const modeDropdown = document.querySelector("#mode-box-mode");
-        if (modeDropdown.value === "add-to-set" || modeDropdown.value === "remove-from-set")
-            this.#displayCustomSets();
+    #isDisplayingCustomSet() {
+        return document.querySelector("#tags").value.split(" ").some(tag => tag.startsWith("custom_set:"));
     }
 
     #getUserSetInstance() {
@@ -19,13 +20,13 @@ class PostOverviewController {
 
     #attachModeChangeHandler() {
         const modeSelect = document.querySelector("#mode-box-mode");
-        modeSelect.addEventListener("change", this.#displayCustomSets.bind(this))
+        modeSelect.addEventListener("change", this.#handleSelectedMode.bind(this))
     }
 
-    async #displayCustomSets() {
+    async #handleSelectedMode() {
         const modeDropdown = document.querySelector("#mode-box-mode");
         const selectedMode = modeDropdown.value;
-        if (selectedMode !== "add-to-set" && selectedMode !== "remove-from-set")
+        if (!this.#isDisplayingCustomSet() && selectedMode !== "add-to-set" && selectedMode !== "remove-from-set")
             return;
 
         if (!this._postsReplaced) {
@@ -33,8 +34,11 @@ class PostOverviewController {
             this.#replacePostEventHandlers();
         }
 
-        const userSetDropdown = document.querySelector("#set-id");
+        this.#displayCustomSets();
+    }
 
+    async #displayCustomSets() {
+        const userSetDropdown = document.querySelector("#set-id");
         await this.#waitUntilSetsAreLoaded(userSetDropdown);
 
         const customSetGroup = document.createElement("optgroup");
@@ -115,7 +119,7 @@ class PostOverviewController {
                     break;
             }
         } catch (error) {
-            UIHelper.displayErrorMessage(error.message);
+            UIHelper.displayErrorMessage(error.message || error?.responseJSON?.message || "A service error occurred!");
         }
     }
 

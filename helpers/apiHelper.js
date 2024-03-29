@@ -24,7 +24,7 @@ class ApiHelper {
     }
 
     static #performDeleteRequest(path) {
-        return this.#performRequest("DELETE", path, data)
+        return this.#performRequest("DELETE", path)
     }
 
     static #performPostRequest(path, body) {
@@ -76,18 +76,14 @@ class ApiHelper {
     static async addPostToFavorites(postId) {
         const response = await this.#performPostRequest(`https://e621.net/favorites.json`,
             {
-                post_ids: postId
+                post_id: postId
             });
-        if (!response || !response.name)
-            throw Error(`Post '${postId}' could not be added to the favorites!`);
 
         return response;
     }
 
     static async removePostFromFavorites(postId) {
         const response = await this.#performDeleteRequest(`https://e621.net/favorites/${postId}.json`);
-        if (!response || !response.name)
-            throw Error(`Post '${postId}' could not be removed from favorites!`);
 
         return response;
     }
