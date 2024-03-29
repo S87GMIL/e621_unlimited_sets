@@ -6,8 +6,7 @@
 // @author       S87GMIL
 // @match        https://e621.net/*
 // @supportURL   https://github.com/S87GMIL/e621_unlimited_sets/issues
-// @updateURL    https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/releases/latest/e621UnlimitedSets.user.js
-// @downloadURL  https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/releases/latest/e621UnlimitedSets.user.js
+// @updateURL    https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/main/e621UnlimitedSets.user.js
 // @icon64       https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.8.0-beta/e6_s87_logo.png
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.8.0-beta/helpers/storageHelper.js
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.8.0-beta/helpers/apiHelper.js
