@@ -6,14 +6,19 @@ class UIHelper {
         return document.getElementById("notice");
     }
 
-    static #displayNotice(type, message, fadeAfter) {
+    static #displayNotice(type, message, fadeAfter, isHtmlMessage = false) {
         let noticeElement = this.#getNoticeElemente();
         noticeElement.classList.remove(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-error" : "ui-state-highlight");
         noticeElement.classList.add(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-highlight" : "ui-state-error");
 
         noticeElement.style.display = "block";
+        const messageSpan = noticeElement.querySelector("span");
 
-        noticeElement.querySelector("span").innerText = message;
+        if (isHtmlMessage) {
+            messageSpan.innerHTML = message;
+        } else {
+            messageSpan.innerText = message;
+        }
 
         if (fadeAfter !== -1)
             setTimeout(() => {
@@ -21,12 +26,12 @@ class UIHelper {
             }, fadeAfter * 1000);
     }
 
-    static displaySuccessMessage(message, fadeAfter = 10) {
-        this.#displayNotice(UIHelper.SUCCESS_NOTICE_TYPE, message, fadeAfter);
+    static displaySuccessMessage(message, fadeAfter = 10, isHtmlMessage) {
+        this.#displayNotice(UIHelper.SUCCESS_NOTICE_TYPE, message, fadeAfter, isHtmlMessage);
     }
 
-    static displayErrorMessage(message, fadeAfter = -1) {
-        this.#displayNotice(UIHelper.ERROR_NOTICE_TYPE, message, fadeAfter);
+    static displayErrorMessage(message, fadeAfter = -1, isHtmlMessage) {
+        this.#displayNotice(UIHelper.ERROR_NOTICE_TYPE, message, fadeAfter, isHtmlMessage);
     }
 
     static substituteE6Image() {

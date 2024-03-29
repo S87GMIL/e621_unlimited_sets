@@ -19,7 +19,7 @@ class SettingsController extends SetBaseController {
         sectionElement.appendChild(formElement);
 
         const downloadButton = document.createElement("button");
-        downloadButton.innerText = "Download Sets";
+        downloadButton.innerText = "Backup Sets";
         downloadButton.className = "btn";
         downloadButton.style.padding = "3px 8px";
         downloadButton.addEventListener("click", this.onDownloadPress.bind(this));
@@ -53,7 +53,7 @@ class SettingsController extends SetBaseController {
         const uploadHint = document.createElement("p");
         uploadHint.style.marginTop = "5px";
         uploadHint.className = "hint";
-        uploadHint.innerText = "Upload a JSON file containing offline sets";
+        uploadHint.innerText = "Upload a JSON backup file containing offline sets";
         formElement.appendChild(uploadHint);
 
         const applySetDataButton = document.createElement("button");
@@ -88,6 +88,71 @@ class SettingsController extends SetBaseController {
         applyHint.className = "hint";
         applyHint.innerText = "This will overwrite all offline sets of the current user with the sets defined in the uploaded file";
         formElement.appendChild(applyHint);
+
+        const backupSettignsDiv = document.createElement("div");
+        backupSettignsDiv.style.marginTop = "35px";
+        formElement.appendChild(backupSettignsDiv);
+
+        const backupSettingsTitle = document.createElement("h2");
+        backupSettingsTitle.innerText = "Backup Settings";
+        backupSettignsDiv.appendChild(backupSettingsTitle);
+
+        backupSettignsDiv.appendChild(document.createElement("br"));
+
+        const reminderHelperInstance = new BackupReminderHelper(UserHelper.getCurrentUserId());
+        const reminderDisabled = reminderHelperInstance.getReminderDisabled();
+
+        const reminderPeriodInput = document.createElement("input");
+
+        const disableReminderLabel = document.createElement("label");
+        disableReminderLabel.className = "string optional";
+        disableReminderLabel.innerText = "Disable backup reminder";
+        backupSettignsDiv.appendChild(disableReminderLabel);
+
+        const disableReminderCheckbox = document.createElement("input");
+        disableReminderCheckbox.type = "checkbox";
+        disableReminderCheckbox.checked = reminderDisabled;
+        disableReminderCheckbox.id = "disableReminderCheckbox";
+        disableReminderCheckbox.style.marginLeft = "8px";
+        disableReminderCheckbox.addEventListener("change", () => reminderPeriodInput.disabled = disableReminderCheckbox.checked)
+        backupSettignsDiv.appendChild(disableReminderCheckbox);
+
+        const disableReminderhint = document.createElement("p");
+        disableReminderhint.style.marginTop = "5px";
+        disableReminderhint.className = "hint";
+        disableReminderhint.innerText = "Prevents the backup reminder from showing up entirely";
+        backupSettignsDiv.appendChild(disableReminderhint);
+
+        const reminderPeridoLabel = document.createElement("label");
+        reminderPeridoLabel.className = "string optional";
+        reminderPeridoLabel.innerText = "Disable backup reminder (Days)";
+        reminderPeridoLabel.style.display = "block";
+        reminderPeridoLabel.style.marginTop = "15px";
+        backupSettignsDiv.appendChild(reminderPeridoLabel);
+
+        reminderPeriodInput.type = "number";
+        reminderPeriodInput.id = "reminderPeriodInput";
+        reminderPeriodInput.value = reminderHelperInstance.getRemidnerPeriod();
+        reminderPeriodInput.disabled = reminderDisabled;
+        backupSettignsDiv.appendChild(reminderPeriodInput);
+
+        const periodHint = document.createElement("p");
+        periodHint.style.marginTop = "5px";
+        periodHint.className = "hint";
+        periodHint.innerText = "The period after which a reminder will be shown, in case no backup has been made since";
+        backupSettignsDiv.appendChild(periodHint);
+
+        backupSettignsDiv.appendChild(document.createElement("br"));
+
+        const saveButton = document.createElement("button");
+        saveButton.innerText = "Save Backup Settings"
+        saveButton.className = "btn";
+        saveButton.style.padding = "2px 6px";
+        saveButton.addEventListener("click", event => {
+            event.preventDefault();
+            this._saveReminderSettings(reminderHelperInstance, reminderPeriodInput.value, disableReminderCheckbox.checked)
+        });
+        backupSettignsDiv.appendChild(saveButton);
 
         return;
 
@@ -277,5 +342,12 @@ class SettingsController extends SetBaseController {
                 reject(error);
             }
         });
+    }
+
+    _saveReminderSettings(reminderHelper, remidnerPeriod, disableReminder) {
+        reminderHelper.setReminderPeriod(remidnerPeriod);
+        reminderHelper.setReminderDisabled(disableReminder);
+
+        UIHelper.displaySuccessMessage("Reminder settings saved!");
     }
 }

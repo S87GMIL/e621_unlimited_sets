@@ -24,7 +24,7 @@ class SetCreatorController extends SetBaseController {
 
         const creationButton = document.createElement("button");
         creationButton.innerText = "Create offline set";
-        creationButton.addEventListener("click", this.#onCreateOfflineSetClick.bind(this));
+        creationButton.addEventListener("click", this._onCreateOfflineSetClick.bind(this));
         createCustomContainer.appendChild(creationButton);
 
         this._errorStrip = document.createElement("p");
@@ -33,7 +33,7 @@ class SetCreatorController extends SetBaseController {
         createCustomContainer.appendChild(this._errorStrip);
     }
 
-    #onCreateOfflineSetClick() {
+    _onCreateOfflineSetClick() {
         const labelInput = document.querySelector("#post_set_name");
         const idInput = document.querySelector("#post_set_shortname");
         const descriptionInput = document.querySelector("#post_set_description_for_");

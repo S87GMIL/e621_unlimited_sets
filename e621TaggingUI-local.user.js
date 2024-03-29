@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         e621 unlimited offline sets
 // @namespace    http://tampermonkey.net/
-// @version      0.5.0
+// @version      0.7.0
 // @description  Allows users to create an unlimited amount of sets, which are saved locally
 // @author       S87GMIL
 // @match        https://e621.net/*
@@ -10,6 +10,7 @@
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\apiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\uiHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\userHelper.js
+// @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\helpers\backupReminderHelper.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\abstractClasses\setBaseController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\abstractClasses\setEditingBaseController.js
 // @require      file:C:\Users\Dev\Desktop\projects\e621_unlimited_sets\classes\user.js
@@ -37,6 +38,10 @@
     const path = document.location.pathname;
     const currentUserId = UserHelper.getCurrentUserId();
     const searchParameters = decodeURIComponent(document.location.search);
+
+    const backupReminder = new BackupReminderHelper(currentUserId);
+    if (backupReminder.isBackupOverdue())
+        backupReminder.displayBackupReminder();
 
     if (!currentUserId)
         throw Error("The user isn't currently logged in!");
