@@ -136,7 +136,7 @@ class PostOverviewController {
                 });
             };
 
-            if (setDropdown.options.length > 0 && setDropdown.options[0].innerText !== "Loading...") {
+            if (setDropdown.options.length > 0 && setDropdown.options[0].innerText !== "Loading..." && setDropdown.children.length === 2) {
                 resolve();
                 return;
             }

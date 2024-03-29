@@ -134,7 +134,7 @@ class CustomSetStorage {
             throw Error(`The post '${postId}' has already been added to set '${customSets[setId].label}'`)
 
         const postData = await ApiHelper.getPost(postId);
-        const createdPost = this.createPostMetadata(postId, postData);
+        const createdPost = CustomSetStorage.createPostMetadata(postId, postData);
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
@@ -151,7 +151,7 @@ class CustomSetStorage {
         customSets[setId].posts = [];
 
         updatedPosts.forEach(async postData => {
-            const createdPost = this.createPostMetadata(postData.id, postData);
+            const createdPost = CustomSetStorage.createPostMetadata(postData.id, postData);
 
             if (this.isPostAlreadyInSet(setId, postData.id))
                 throw Error(`The post '${postData.id}' has already been added to set '${customSets[setId].label}'`)

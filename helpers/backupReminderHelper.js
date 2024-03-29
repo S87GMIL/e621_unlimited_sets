@@ -13,7 +13,7 @@ class BackupReminderHelper {
     #getBackupInfo() {
         let backupinfo = StorageHelper.getValue(this.BACKUP_INFO_KEY_PREFIX + this._userId);
         if (!backupinfo) {
-            const oldestSetDate = this.#getOldestSet().createdOn;
+            const oldestSetDate = this.#getOldestSet()?.createdOn || Date.now();
             backupinfo = {
                 lastBackupDate: oldestSetDate,
                 disableReminder: false,
@@ -26,13 +26,21 @@ class BackupReminderHelper {
     }
 
     #getOldestSet() {
-        return new CustomSetStorage(this._userId).getUserSets().reduce((pre, cur) => {
+        const userSets = new CustomSetStorage(this._userId).getUserSets();
+        if (userSets.length === 0)
+            return null;
+
+        return userSets.reduce((pre, cur) => {
             return new Date(pre.createdOn) > new Date(cur.createdOn) ? cur : pre;
         });
     }
 
     #haveSetsChangedSinceLastBackup(lastBackup) {
-        const lastChangedSet = new CustomSetStorage(this._userId).getUserSets().reduce((pre, cur) => {
+        const userSets = new CustomSetStorage(this._userId).getUserSets();
+        if (userSets.length === 0)
+            return false;
+
+        const lastChangedSet = userSets.reduce((pre, cur) => {
             return new Date(pre.changedOn) < new Date(cur.changedOn) ? cur : pre;
         });
 
@@ -83,11 +91,11 @@ class BackupReminderHelper {
     getLastBackupDate() {
         const backupInfo = this.#getBackupInfo();
         if (!backupInfo || !backupInfo.lastBackupDate) {
-            const oldestSetDate = new Date(this.#getOldestSet().createdOn);
+            const oldestSetDate = new Date(this.#getOldestSet()?.createdOn || Date.now());
             this.setLastBackupDate(oldestSetDate);
         }
 
-        return new Date(this.#getBackupInfo().lastBackupDate);
+        return new Date(this.#getBackupInfo()?.lastBackupDate || Date.now());
     }
 
     isBackupOverdue() {
