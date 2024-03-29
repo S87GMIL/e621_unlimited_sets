@@ -208,6 +208,8 @@ class SettingsController extends SetBaseController {
 
         donwloadAnchor.setAttribute("download", `offline_sets_${UserHelper.getCurrentUserId()}_${currentDateString}.json`);
         donwloadAnchor.click();
+
+        new BackupReminderHelper(UserHelper.getCurrentUserId()).setLastBackupDate(new Date());
     }
 
     #validateSetFile(setFile) {
