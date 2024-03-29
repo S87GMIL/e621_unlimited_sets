@@ -153,56 +153,6 @@ class SettingsController extends SetBaseController {
             this._saveReminderSettings(reminderHelperInstance, reminderPeriodInput.value, disableReminderCheckbox.checked)
         });
         backupSettignsDiv.appendChild(saveButton);
-
-        return;
-
-        formElement.appendChild(document.createElement("br"));
-        formElement.appendChild(document.createElement("br"));
-
-        const inputElements = [
-            { type: 'input', id: 'repoUrl', value: "", label: 'Repository URL' },
-            { type: 'input', id: 'accessToken', value: "", label: 'Git Access Token' }
-        ];
-
-        inputElements.forEach(input => {
-            const inputDiv = document.createElement('div');
-            inputDiv.className = "input string optional";
-            formElement.appendChild(inputDiv);
-
-            if (input.label) {
-                const labelElement = document.createElement('label');
-                labelElement.className = `${input.type} optional`;
-                labelElement.htmlFor = input.id;
-                labelElement.textContent = input.label;
-                inputDiv.appendChild(labelElement);
-            }
-
-            const inputElement = document.createElement(input.type);
-
-            if (input.type !== "textarea")
-                inputElement.type = input.type;
-
-            inputElement.name = input.name;
-            inputElement.id = input.id;
-            inputElement.value = input.value || '';
-
-            inputDiv.appendChild(inputElement);
-        });
-
-        const submitButton = document.createElement("button");
-        submitButton.innerText = "Apply Git Settings";
-        submitButton.className = "btn";
-        submitButton.style.marginRight = "15px"
-        submitButton.style.padding = "3px 8px";
-        submitButton.addEventListener("click", this.onSaveSettingsPress.bind(this));
-        formElement.appendChild(submitButton);
-
-        const gitHint = document.createElement("p");
-        gitHint.style.marginTop = "5px";
-        gitHint.className = "hint";
-        gitHint.innerText = `These GitHub settings will be used to automatically backup your sets to the define GitHub repository, make sure, that you choose an empty repositry that isn't used for anything else.
-        The repository URL as well as your access token will only be saved locally in your browser.`;
-        formElement.appendChild(gitHint);
     }
 
     #loadFile(uplaodedFile, progressBar) {
