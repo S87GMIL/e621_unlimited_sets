@@ -66,14 +66,16 @@ class PostController {
         try {
             const userSetDropdown = document.querySelector("#add-to-set-id");
             const selectedSet = userSetDropdown.options[userSetDropdown.selectedIndex];
+            const postId = this.#getCurrentPostId();
+
             if (selectedSet.dataset.isCustomSet) {
                 const customSet = this.#getUserSetInstance().getSet(userSetDropdown.value);
-                await customSet.addPost(this.#getCurrentPostId());
+                await customSet.addPost(postId);
             } else {
-                await ApiHelper.addPostToSet(userSetDropdown.value, this.#getCurrentPostId());
+                await ApiHelper.addPostToSet(userSetDropdown.value, postId);
             }
 
-            UIHelper.displaySuccessMessage(`The current post has been added to the set '${selectedSet.innerText}'`);
+            UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSet.innerText}'`);
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
         }
