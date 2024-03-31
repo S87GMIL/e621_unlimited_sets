@@ -49,4 +49,11 @@ class UserSets {
         }
     }
 
+    getSetsOfPost(postId) {
+        if (!postId)
+            throw Error("No post ID was passed!");
+
+        return this._setInstances.filter(set => set.getPostIndexInSet(postId) !== -1);
+    }
+
 }
