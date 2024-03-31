@@ -50,7 +50,7 @@ class PostController {
             const observerCallback = function (mutationsList, observer) {
                 mutationsList.forEach(mutation => {
                     if (mutation.type === 'childList') {
-                        if (mutation.target.options[0].innerText !== "Loading...") {
+                        if (mutation.target.options?.[0].innerText !== "Loading...") {
                             oObserver.disconnect();
                             resolve()
                         }
@@ -76,6 +76,9 @@ class PostController {
             }
 
             UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSet.innerText}'`);
+
+            //Close the dialog by simply clicking on the close button
+            document.querySelector("#ui-id-5").parentElement.querySelector("button").click()
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
         }
