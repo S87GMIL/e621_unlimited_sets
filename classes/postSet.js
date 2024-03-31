@@ -75,4 +75,19 @@ class PostSet {
         this._customSetStorageInstance.deleteSet(this.getId());
     }
 
+    getPostIndexInSet(postId) {
+        if (!postId)
+            throw Error("No post ID was passed!");
+
+        return this._posts.findIndex(post => post.postId === postId);
+    }
+
+    getPostByIndex(index) {
+        return this._posts[index];
+    }
+
+    getPostCount() {
+        return this._posts.length;
+    }
+
 }

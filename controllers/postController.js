@@ -2,6 +2,110 @@ class PostController {
 
     constructor() {
         this.#attachAddToSetHandler();
+        this.#displayPostSets();
+    }
+
+    #getSetNavBar() {
+        const setNavBar = document.querySelector("#nav-links-top > div.set-nav");
+        if (setNavBar)
+            return setNavBar;
+
+        const customNavBar = document.createElement("div");
+        customNavBar.className = "set-nav";
+        document.querySelector("#nav-links-top").appendChild(customNavBar);
+
+        return customNavBar;
+    }
+
+    #displayPostSets() {
+        const noSetQueryNavigator = document.querySelector("#nav-links-top > div.search-seq-nav");
+        const queriedSetId = new URLSearchParams(document.location.search).get("custom_set_id");
+
+        const sets = new UserSets(UserHelper.getCurrentUserId()).getSetsOfPost(this.#getCurrentPostId());
+        if (sets.length === 0)
+            return;
+
+        noSetQueryNavigator.style.display = "none";
+
+        const setNavBar = this.#getSetNavBar();
+        sets.forEach(setInstance => {
+            const setNavElement = this.#createSetNavElement(setInstance);
+
+            if (queriedSetId === setInstance.getId()) {
+                setNavBar.insertBefore(setNavElement, setNavBar.firstChild);
+            } else {
+                setNavBar.appendChild(setNavElement);
+            }
+        });
+    }
+
+    #createSetNavElement(setInstance) {
+        const ulElement = document.createElement('ul');
+
+        const liElement = document.createElement('li');
+        liElement.className = 'set-selected-false';
+
+        const currentPostIndex = setInstance.getPostIndexInSet(this.#getCurrentPostId());
+
+        let firstAnchor = document.createElement('a');
+        if (currentPostIndex === 0) {
+            firstAnchor = document.createElement('span');
+        } else {
+            firstAnchor = document.createElement('a');
+            firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?custom_set_id=${setInstance.getId()}`;
+        }
+        firstAnchor.className = 'first';
+        firstAnchor.title = 'to first';
+        firstAnchor.textContent = '« first';
+        liElement.appendChild(firstAnchor);
+
+        let prevAnchor;
+        if (currentPostIndex === -1 || currentPostIndex === 0) {
+            prevAnchor = document.createElement('span');
+        } else {
+            prevAnchor = document.createElement('a');
+            prevAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex - 1).postId}?custom_set_id=${setInstance.getId()}`;
+        }
+        prevAnchor.className = 'prev';
+        prevAnchor.textContent = '‹ prev';
+        liElement.appendChild(prevAnchor);
+
+        const spanElement = document.createElement('span');
+        spanElement.className = 'set-name';
+
+        const setNameAnchor = document.createElement('a');
+        setNameAnchor.href = `/custom_sets/${setInstance.getId()}`;
+        setNameAnchor.textContent = `Set: ${setInstance.getLabel()}`;
+        spanElement.appendChild(setNameAnchor);
+
+        liElement.appendChild(spanElement);
+
+        let nextAnchor;
+        const totalPostCount = setInstance.getPostCount();
+        if (currentPostIndex + 1 < totalPostCount) {
+            nextAnchor = document.createElement('a');
+            nextAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex + 1).postId}?custom_set_id=${setInstance.getId()}`;
+        } else {
+            nextAnchor = document.createElement('span');
+        }
+        nextAnchor.className = 'next';
+        nextAnchor.textContent = 'next ›';
+        liElement.appendChild(nextAnchor);
+
+        let lastAnchor = document.createElement('a');
+        if (currentPostIndex === totalPostCount - 1) {
+            lastAnchor = document.createElement('span');
+        } else {
+            lastAnchor = document.createElement('a');
+            lastAnchor.href = `/posts/${setInstance.getPostByIndex(totalPostCount - 1).postId}?custom_set_id=${setInstance.getId()}`;
+        }
+        lastAnchor.className = 'last';
+        lastAnchor.title = 'to last';
+        lastAnchor.textContent = 'last »';
+        liElement.appendChild(lastAnchor);
+
+        ulElement.appendChild(liElement);
+        return liElement;
     }
 
     #getUserSetInstance() {
@@ -12,7 +116,7 @@ class PostController {
     }
 
     #getCurrentPostId() {
-        return document.querySelector('meta[name="post-id"]').content;;
+        return Number(document.querySelector('meta[name="post-id"]').content);
     }
 
     #attachAddToSetHandler() {
