@@ -157,9 +157,10 @@ class GitRepository {
             console.info("Offline sets successfully backed up in the defined GitHub repository!");
             return response;
         } catch (error) {
-            const errorMessage = `Error while saving changes to GIT! Message: ${error.message}`;
+            const errorMessage = `Error while saving changes to GIT, make sure that all settings re correct! Message: ${error.message}`;
             console.error(error);
             UIHelper.displayErrorMessage(errorMessage);
+
             throw Error(errorMessage);
         }
     }
