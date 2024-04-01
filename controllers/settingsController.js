@@ -194,7 +194,10 @@ class SettingsController extends SetBaseController {
             { type: 'input', id: 'gitUsername', value: "", label: 'GitHub Username' },
             { type: 'input', id: 'repoName', value: "", label: 'Repository Name' },
             { type: 'input', id: 'gitBranchName', value: "", label: 'Branch Name' },
-            { type: 'input', id: 'accessToken', value: "", label: 'Git Access Token' }
+            {
+                type: 'input', id: 'accessToken', value: "", label: 'Git Access Token',
+                hint: `For security reasons, make sure to create an access token that can only change this one repository, and nothing else!<br />
+            To learn more, and find out how to create an access token, click here <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token">Create an access token</a>` }
         ];
 
         const gitInputFieldDiv = document.createElement("div");
@@ -243,6 +246,14 @@ class SettingsController extends SetBaseController {
                 inputElement.disabled = input.disabled
 
             inputDiv.appendChild(inputElement);
+
+            if (input.hint) {
+                const hint = document.createElement("p");
+                hint.style.marginTop = "5px";
+                hint.className = "hint";
+                hint.innerHTML = input.hint;
+                inputDiv.appendChild(hint);
+            }
         });
 
         const submitButton = document.createElement("button");
