@@ -124,12 +124,14 @@ class SettingsController extends SetBaseController {
         disableReminderLabel.innerText = "Disable backup reminder";
         backupSettingsDiv.appendChild(disableReminderLabel);
 
+        const reminderPeriodInputDiv = document.createElement("div");
+
         const disableReminderCheckbox = document.createElement("input");
         disableReminderCheckbox.type = "checkbox";
         disableReminderCheckbox.checked = reminderDisabled;
         disableReminderCheckbox.id = "disableReminderCheckbox";
         disableReminderCheckbox.style.marginLeft = "8px";
-        disableReminderCheckbox.addEventListener("change", () => reminderPeriodInput.disabled = disableReminderCheckbox.checked)
+        disableReminderCheckbox.addEventListener("change", () => reminderPeriodInputDiv.style.display = disableReminderCheckbox.checked ? "none" : "block")
         backupSettingsDiv.appendChild(disableReminderCheckbox);
 
         const disableReminderHint = document.createElement("p");
@@ -138,24 +140,26 @@ class SettingsController extends SetBaseController {
         disableReminderHint.innerText = "Prevents the backup reminder from showing up entirely";
         backupSettingsDiv.appendChild(disableReminderHint);
 
+        reminderPeriodInputDiv.style.display = reminderDisabled ? "none" : "block";
+        backupSettingsDiv.appendChild(reminderPeriodInputDiv);
+
         const reminderPeriodLabel = document.createElement("label");
         reminderPeriodLabel.className = "string optional";
-        reminderPeriodLabel.innerText = "Disable backup reminder (Days)";
+        reminderPeriodLabel.innerText = "Backup reminder period (Days)";
         reminderPeriodLabel.style.display = "block";
         reminderPeriodLabel.style.marginTop = "15px";
-        backupSettingsDiv.appendChild(reminderPeriodLabel);
+        reminderPeriodInputDiv.appendChild(reminderPeriodLabel);
 
         reminderPeriodInput.type = "number";
         reminderPeriodInput.id = "reminderPeriodInput";
         reminderPeriodInput.value = reminderHelperInstance.getReminderPeriod();
-        reminderPeriodInput.disabled = reminderDisabled;
-        backupSettingsDiv.appendChild(reminderPeriodInput);
+        reminderPeriodInputDiv.appendChild(reminderPeriodInput);
 
         const periodHint = document.createElement("p");
         periodHint.style.marginTop = "5px";
         periodHint.className = "hint";
         periodHint.innerText = "The period after which a reminder will be shown, in case no backup has been made since";
-        backupSettingsDiv.appendChild(periodHint);
+        reminderPeriodInputDiv.appendChild(periodHint);
 
         const saveButton = document.createElement("button");
         saveButton.innerText = "Save Backup Settings"
