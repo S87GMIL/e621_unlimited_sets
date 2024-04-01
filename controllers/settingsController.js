@@ -381,7 +381,13 @@ class SettingsController extends SetBaseController {
         try {
             this.#validateSetFile(this._uploadedFile);
 
-            await this.#synchronizeRemoteSetsWithLocalSets(this._uploadedFile);
+            const setsUpdated = await this.#synchronizeRemoteSetsWithLocalSets(this._uploadedFile);
+            if (!setsUpdated) {
+                button.innerText = originalButtonText;
+                return;
+            }
+
+            await this._gitRepoInstance.saveChangesToRepository(GitRepository.BACKUP_SYNCHRONIZED);
 
             UIHelper.displaySuccessMessage("Set file has successfully been loaded and applied!");
         } catch (error) {
@@ -391,18 +397,18 @@ class SettingsController extends SetBaseController {
         button.innerText = originalButtonText;
     }
 
-    async #synchronizeRemoteSetsWithLocalSets(remoteSets, saveToGit) {
+    async #synchronizeRemoteSetsWithLocalSets(remoteSets) {
         const userSetInstance = this.#getUserSets();
         const overwrittenSetCount = Object.keys(remoteSets).filter(setId => userSetInstance.hasSet(setId)).length;
         const newSetCount = Object.keys(remoteSets).filter(setId => !userSetInstance.hasSet(setId)).length;
 
         if (!overwrittenSetCount && !newSetCount) {
             UIHelper.displayErrorMessage("The uploaded file doesn't contain any sets!");
-            return;
+            return false;
         }
 
-        if (confirm(`Please confirm, that you want to replace '${overwrittenSetCount}' existing set${overwrittenSetCount > 1 ? 's' : ''}, and create '${newSetCount}' new set${newSetCount > 1 ? 's' : ''}`) !== true)
-            return;
+        if (confirm(`Please confirm, that you want to merge '${overwrittenSetCount}' existing set${overwrittenSetCount > 1 ? 's' : ''}, and create '${newSetCount}' new set${newSetCount > 1 ? 's' : ''}`) !== true)
+            return false;
 
         Object.keys(remoteSets).forEach(setId => {
             const set = remoteSets[setId];
@@ -411,30 +417,37 @@ class SettingsController extends SetBaseController {
                 userSetInstance.createSet(set.setId, set.label, set.description);
         });
 
-        await this.#updateSetPosts(remoteSets, 0, saveToGit);
+        await this.#updateSetPosts(remoteSets, 0);
+        return true;
     }
 
-    async #updateSetPosts(newSetMetaData, index = 0, saveToGit = true) {
+    async #updateSetPosts(newSetMetaData, index = 0) {
         return new Promise(async (resolve, reject) => {
             try {
                 const setId = Object.keys(newSetMetaData)[index];
                 if (!setId) {
-                    if (saveToGit)
-                        await this._gitRepoInstance.saveChangesToRepository(GitRepository.BACKUP_SYNCHRONIZED);
-
                     resolve();
                     return;
                 }
 
                 const setMetaData = newSetMetaData[setId];
-                if (setMetaData.posts.length > 0) {
-                    const loadedPosts = await E6ApiHelper.loadBulkPost(setMetaData.posts);
+                let existingPosts = [];
+                try {
+                    existingPosts = this.#getSetStorageInstance().getUserSet(setId).posts.map(post => post.postId);
+                } catch (error) {
+                    //Just ignore it, when the set doesn't exist on the client
+                }
+
+                const mergedPosts = Array.from(new Set(setMetaData.posts.concat(existingPosts)));
+                if (mergedPosts.length > 0) {
+                    const loadedPosts = await E6ApiHelper.loadBulkPost(mergedPosts);
                     setMetaData.posts = loadedPosts.map(post => CustomSetStorage.createPostMetadata(post.id, post));
                 }
 
                 this.#getSetStorageInstance().updateSetFromMetadata(setId, setMetaData);
-                await this.#updateSetPosts(newSetMetaData, index + 1, saveToGit);
-                resolve()
+                await this.#updateSetPosts(newSetMetaData, index + 1);
+
+                resolve();
             } catch (error) {
                 reject(error);
             }
@@ -480,7 +493,7 @@ class SettingsController extends SetBaseController {
 
         try {
             const gitUserSets = await this._gitRepoInstance.loadGitUserSets();
-            await this.#synchronizeRemoteSetsWithLocalSets(gitUserSets, false);
+            await this.#synchronizeRemoteSetsWithLocalSets(gitUserSets);
 
             UIHelper.displaySuccessMessage("Local sets have successfully been synchronized with the Git repository!");
         } catch (error) {
