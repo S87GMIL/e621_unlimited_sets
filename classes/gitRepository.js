@@ -95,4 +95,16 @@ class GitRepository {
                 return `Changed the name of the set '${setLabel}'`;
         }
     }
+
+    async #performRequest(method, url, body) {
+        const response = await GM.xmlHttpRequest({
+            method: method,
+            url: url,
+            headers: body ? {
+                "Content-Type": "application/json"
+            } : {},
+            data: body || {}
+        });
+        return response;
+    }
 }
