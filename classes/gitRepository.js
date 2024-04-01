@@ -54,7 +54,7 @@ class GitRepository {
     }
 
     isGitBackupEnabled() {
-        return this.#getUserGitSettings().gitEnabled;
+        return this._gitBackupEnabled;
     }
 
     setGitBackupEnabled(enabled) {

@@ -191,13 +191,14 @@ class SettingsController extends SetBaseController {
         gitSettingsSection.appendChild(disableGitLabel);
 
         const inputElements = [
-            { type: 'input', id: 'gitUsername', value: "", label: 'GitHub Username' },
-            { type: 'input', id: 'repoName', value: "", label: 'Repository Name' },
-            { type: 'input', id: 'gitBranchName', value: "", label: 'Branch Name' },
+            { element: 'input', type: "input", id: 'gitUsername', value: gitRepoInstance.getUsername(), label: 'GitHub Username' },
+            { element: 'input', type: "input", id: 'repoName', value: gitRepoInstance.getRepositoryName(), label: 'Repository Name' },
+            { element: 'input', type: "input", id: 'gitBranchName', value: gitRepoInstance.getBranchName(), label: 'Branch Name' },
             {
-                type: 'input', id: 'accessToken', value: "", label: 'Git Access Token',
+                element: 'input', type: "password", id: 'accessToken', value: gitRepoInstance.getAccessToken(), label: 'Git Access Token',
                 hint: `For security reasons, make sure to create an access token that can only change this one repository, and nothing else!<br />
-            To learn more, and find out how to create an access token, click here <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token">Create an access token</a>` }
+            To learn more, and find out how to create an access token, click here: <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token">personal access token help</a><br />
+            In case you are already logged into GitHub, you can jump directly to the personal access token creation by pressing this link: <a target="_blank" href="https://github.com/settings/personal-access-tokens/new">Create personal access token</a> ` }
         ];
 
         const gitInputFieldDiv = document.createElement("div");
@@ -235,7 +236,7 @@ class SettingsController extends SetBaseController {
                 inputDiv.appendChild(labelElement);
             }
 
-            const inputElement = document.createElement(input.type);
+            const inputElement = document.createElement(input.element);
 
             inputElement.type = input.type;
             inputElement.name = input.name;
