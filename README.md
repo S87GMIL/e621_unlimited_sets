@@ -40,6 +40,13 @@ By default, the user will be reminded after 30 days to back up any created sets;
 
 <image src="./readme_images/offline_set_settings.png" style="box-shadow: 0px 0px 10px black;"><br> 
 
+### GitHub Settings
+
+It is also possible to connect a GitHub repository, so that every update to the offline user sets will automatically be committed to the defined GitHub repository.<br />
+When enabled, it is also possible to share offline sets across multiple devices, by simply pressing the "Synchronize with Git" button, and automatically applying the current version in the defined GitHub repository.<br />
+This will attempt to merge the local sets with the sets in the Git repository by adding posts, which are present in the repo but no in the local files, and vise versa.<br />
+<image src="./readme_images/offline_set_settings_github.png" style="box-shadow: 0px 0px 10px black;"><br> 
+
 ## My set page
 
 The offline sets are only visible on the user set overview page, which can be reached by clicking the "Mine" menu item on the "Sets" Page.<br>
