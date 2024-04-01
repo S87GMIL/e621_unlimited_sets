@@ -68,7 +68,7 @@ class BackupReminderHelper {
         StorageHelper.saveValue(this.BACKUP_INFO_KEY_PREFIX + this._userId, backupInfo);
     }
 
-    getRemidnerPeriod() {
+    getReminderPeriod() {
         return this.#getBackupInfo().backupReminderPeriod;
     }
 

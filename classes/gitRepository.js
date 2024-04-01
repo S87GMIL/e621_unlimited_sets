@@ -11,7 +11,12 @@ class GitRepository {
     static POST_ADDED_ACTION = "post_added";
     static POST_REMOVED_ACTION = "post_removed";
 
-    constructor() {
+    constructor(userId) {
+        if (!userId)
+            throw Error("No user ID was passed!");
+
+        this._userId = userId;
+
         const gitSettings = this.#getUserGitSettings();
 
         this._gitUsername = gitSettings.username;
@@ -22,16 +27,15 @@ class GitRepository {
     }
 
     #createGitUserSettingsKey() {
-        return `git_settings_${userId}`;
+        return `git_settings_${this._userId}`;
     }
 
     #getUserGitSettings() {
         if (!this._gitSettings) {
-            const userId = UserHelper.getCurrentUserId();
             this._gitSettings = StorageHelper.getValue(this.#createGitUserSettingsKey());
 
             if (!this._gitSettings) {
-                console.info(`No git settings found for user '${userId}'`);
+                console.info(`No git settings found for user '${this._userId}'`);
                 return this.#createSettingsJson();
             }
         }
@@ -115,8 +119,8 @@ class GitRepository {
         StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryName(), this._branchName, this.getUsername(), this.getAccessToken(), this.isGitBackupEnabled()));
     }
 
-    async loadSetsFromRepository(userId) {
-        const fileName = `e6OfflineSets_${userId}`;
+    async loadSetsFromRepository() {
+        const fileName = `e6OfflineSets_${this._userId}`;
         const response = await GitAPIHelper.getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
@@ -128,12 +132,12 @@ class GitRepository {
         return response;
     }
 
-    async saveChangesToRepository(userId, action, setLabel, changedPosts) {
+    async saveChangesToRepository(action, setLabel, changedPosts) {
         if (!this.isGitBackupEnabled())
             return;
 
-        const offlineSetFileContent = new CustomSetStorage(userId).getRawSetData();
-        const fileName = `e6OfflineSets_${userId}`;
+        const offlineSetFileContent = new CustomSetStorage(this._userId).getRawSetData();
+        const fileName = `e6OfflineSets_${this._userId}`;
 
         const response = await GitAPIHelper.createGithubCommit(
             this.getAccessToken(),

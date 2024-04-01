@@ -18,24 +18,37 @@ class SettingsController extends SetBaseController {
         formElement.noValidate = true;
         sectionElement.appendChild(formElement);
 
+        this._createFileBackupSection(formElement);
+        this._createBackupReminderSection(formElement);
+        this._createGitSettingSection(formElement);
+    }
+
+    _createFileBackupSection(parentContainer) {
+        const fileBackupSection = document.createElement("div");
+        parentContainer.appendChild(fileBackupSection);
+
+        const fileBackupTitle = document.createElement("h2");
+        fileBackupTitle.innerText = "File Backup";
+        fileBackupSection.appendChild(fileBackupTitle);
+
+        fileBackupSection.appendChild(document.createElement("br"));
+
         const downloadButton = document.createElement("button");
         downloadButton.innerText = "Backup Sets";
         downloadButton.className = "btn";
         downloadButton.style.padding = "3px 8px";
         downloadButton.addEventListener("click", this.onDownloadPress.bind(this));
-        formElement.appendChild(downloadButton);
+        fileBackupSection.appendChild(downloadButton);
 
         const downloadHint = document.createElement("p");
         downloadHint.style.marginTop = "5px";
         downloadHint.className = "hint";
         downloadHint.innerText = "Downloads all defined offline sets for the currently logged in user";
-        formElement.appendChild(downloadHint);
-
-        formElement.appendChild(document.createElement("br"));
+        fileBackupSection.appendChild(downloadHint);
 
         const uploadDiv = document.createElement("div");
         uploadDiv.style.display = "flex";
-        formElement.appendChild(uploadDiv);
+        fileBackupSection.appendChild(uploadDiv);
 
         const fileUploader = document.createElement("input");
         fileUploader.type = "file";
@@ -54,7 +67,7 @@ class SettingsController extends SetBaseController {
         uploadHint.style.marginTop = "5px";
         uploadHint.className = "hint";
         uploadHint.innerText = "Upload a JSON backup file containing offline sets";
-        formElement.appendChild(uploadHint);
+        fileBackupSection.appendChild(uploadHint);
 
         const applySetDataButton = document.createElement("button");
         const applyHint = document.createElement("p");
@@ -81,17 +94,19 @@ class SettingsController extends SetBaseController {
         applySetDataButton.className = "btn";
         applySetDataButton.style.padding = "3px 8px";
         applySetDataButton.addEventListener("click", this.onApplyUploadedClick.bind(this));
-        formElement.appendChild(applySetDataButton);
+        fileBackupSection.appendChild(applySetDataButton);
 
         applyHint.style.display = "none";
         applyHint.style.marginTop = "5px";
         applyHint.className = "hint";
         applyHint.innerText = "This will overwrite all offline sets of the current user with the sets defined in the uploaded file";
-        formElement.appendChild(applyHint);
+        fileBackupSection.appendChild(applyHint);
+    }
 
+    _createBackupReminderSection(parentContainer) {
         const backupSettingsDiv = document.createElement("div");
-        backupSettingsDiv.style.marginTop = "35px";
-        formElement.appendChild(backupSettingsDiv);
+        backupSettingsDiv.style.marginTop = "40px";
+        parentContainer.appendChild(backupSettingsDiv);
 
         const backupSettingsTitle = document.createElement("h2");
         backupSettingsTitle.innerText = "Backup Settings";
@@ -132,7 +147,7 @@ class SettingsController extends SetBaseController {
 
         reminderPeriodInput.type = "number";
         reminderPeriodInput.id = "reminderPeriodInput";
-        reminderPeriodInput.value = reminderHelperInstance.getreminderPeriod();
+        reminderPeriodInput.value = reminderHelperInstance.getReminderPeriod();
         reminderPeriodInput.disabled = reminderDisabled;
         backupSettingsDiv.appendChild(reminderPeriodInput);
 
@@ -141,8 +156,6 @@ class SettingsController extends SetBaseController {
         periodHint.className = "hint";
         periodHint.innerText = "The period after which a reminder will be shown, in case no backup has been made since";
         backupSettingsDiv.appendChild(periodHint);
-
-        backupSettingsDiv.appendChild(document.createElement("br"));
 
         const saveButton = document.createElement("button");
         saveButton.innerText = "Save Backup Settings"
@@ -153,6 +166,100 @@ class SettingsController extends SetBaseController {
             this._saveReminderSettings(reminderHelperInstance, reminderPeriodInput.value, disableReminderCheckbox.checked)
         });
         backupSettingsDiv.appendChild(saveButton);
+    }
+
+    _createGitSettingSection(parentContainer) {
+        const gitRepoInstance = new GitRepository(UserHelper.getCurrentUserId());
+        const gitBackupEnabled = gitRepoInstance.isGitBackupEnabled();
+
+        const gitSettingsSection = document.createElement("div");
+        gitSettingsSection.style.marginTop = "40px";
+
+        const gitBackupTitle = document.createElement("h2");
+        gitBackupTitle.innerText = "Git Backup";
+        gitSettingsSection.appendChild(gitBackupTitle);
+
+        gitSettingsSection.appendChild(document.createElement("br"));
+
+        const disableGitLabel = document.createElement("label");
+        disableGitLabel.className = "string optional";
+        disableGitLabel.innerText = "Disable Git Backup";
+        gitSettingsSection.appendChild(disableGitLabel);
+
+        const inputElements = [
+            { type: 'input', id: 'gitUsername', value: "", label: 'GitHub Username' },
+            { type: 'input', id: 'repoName', value: "", label: 'Repository Name' },
+            { type: 'input', id: 'gitBranchName', value: "", label: 'Branch Name' },
+            { type: 'input', id: 'accessToken', value: "", label: 'Git Access Token' }
+        ];
+
+        const gitInputFieldDiv = document.createElement("div");
+
+        const disableGitCheckbox = document.createElement("input");
+        disableGitCheckbox.type = "checkbox";
+        disableGitCheckbox.id = "gitBackupEnabledCheckbox";
+        disableGitCheckbox.checked = !gitBackupEnabled;
+        disableGitCheckbox.style.marginLeft = "8px";
+        disableGitCheckbox.addEventListener("change", () => {
+            gitInputFieldDiv.style.display = disableGitCheckbox.checked ? "none" : "block";
+        });
+        gitSettingsSection.appendChild(disableGitCheckbox);
+
+        const disableGitHint = document.createElement("p");
+        disableGitHint.style.marginTop = "5px";
+        disableGitHint.className = "hint";
+        disableGitHint.innerText = "When disabled, changes made to offline sets will not be backed up to GitHub and should be manually backed up after a certain period of time";
+        gitSettingsSection.appendChild(disableGitHint);
+
+
+        gitSettingsSection.appendChild(gitInputFieldDiv);
+        gitInputFieldDiv.style.display = gitBackupEnabled ? "block" : "none";
+
+        inputElements.forEach(input => {
+            const inputDiv = document.createElement('div');
+            inputDiv.className = "input string optional";
+            gitInputFieldDiv.appendChild(inputDiv);
+
+            if (input.label) {
+                const labelElement = document.createElement('label');
+                labelElement.className = `${input.type} optional`;
+                labelElement.htmlFor = input.id;
+                labelElement.textContent = input.label;
+                inputDiv.appendChild(labelElement);
+            }
+
+            const inputElement = document.createElement(input.type);
+
+            inputElement.type = input.type;
+            inputElement.name = input.name;
+            inputElement.id = input.id;
+            inputElement.value = input.value || '';
+
+            if (inputElement.disabled !== undefined)
+                inputElement.disabled = input.disabled
+
+            inputDiv.appendChild(inputElement);
+        });
+
+        const submitButton = document.createElement("button");
+        submitButton.innerText = "Apply Git Settings";
+        submitButton.className = "btn";
+        submitButton.style.marginRight = "15px"
+        submitButton.style.padding = "3px 8px";
+        submitButton.addEventListener("click", event => {
+            event.preventDefault();
+            this.onSaveGitSettingsPress(gitRepoInstance);
+        });
+        gitSettingsSection.appendChild(submitButton);
+
+        const gitHint = document.createElement("p");
+        gitHint.style.marginTop = "5px";
+        gitHint.className = "hint";
+        gitHint.innerText = `These GitHub settings will be used to automatically backup your sets to the define GitHub repository, make sure, that you choose an empty repository that isn't used for anything else.
+        Your username as well as your access token will only be saved locally in your browser.`;
+        gitSettingsSection.appendChild(gitHint);
+
+        parentContainer.appendChild(gitSettingsSection);
     }
 
     #loadFile(uploadedFile, progressBar) {
@@ -301,5 +408,30 @@ class SettingsController extends SetBaseController {
         reminderHelper.setReminderDisabled(disableReminder);
 
         UIHelper.displaySuccessMessage("Reminder settings saved!");
+    }
+
+    onSaveGitSettingsPress(gitRepoInstance) {
+        const gitBackupEnabled = !document.getElementById("gitBackupEnabledCheckbox").checked;
+
+        const gitRepoName = document.getElementById("repoName").value;
+        const gitUsername = document.getElementById("gitUsername").value;
+        const gitAccessToken = document.getElementById("accessToken").value;
+        const branchName = document.getElementById("gitBranchName").value;
+
+        if (gitBackupEnabled && (!gitRepoName || !gitUsername || !gitAccessToken)) {
+            UIHelper.displayErrorMessage("Not all required GitHub settings have been filled out!");
+            return;
+        }
+
+        gitRepoInstance.setGitBackupEnabled(gitBackupEnabled);
+
+        if (gitBackupEnabled) {
+            gitRepoInstance.setUsername(gitUsername);
+            gitRepoInstance.setAccessToken(gitAccessToken);
+            gitRepoInstance.setRepositoryName(gitRepoName);
+            gitRepoInstance.setBranchName(branchName);
+        }
+
+        UIHelper.displaySuccessMessage("GitHub settings saved!");
     }
 }

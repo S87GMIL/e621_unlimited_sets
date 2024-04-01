@@ -7,7 +7,7 @@ class CustomSetStorage {
             throw new Error("No user ID was passed!");
 
         this._userId = userId;
-        this._gitRepoInstance = new GitRepository();
+        this._gitRepoInstance = new GitRepository(userId);
     }
 
     #createUserSetsKey() {
@@ -80,7 +80,7 @@ class CustomSetStorage {
         };
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_CREATED_ACTION, label);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_CREATED_ACTION, label);
 
         return customSets[setId];
     }
@@ -109,7 +109,7 @@ class CustomSetStorage {
         };
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_UPDATED_ACTION, setMetadata.label, setMetadata.posts);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_UPDATED_ACTION, setMetadata.label, setMetadata.posts);
 
         return customSets[setId];
     }
@@ -129,7 +129,7 @@ class CustomSetStorage {
         }
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_DELETED_ACTION, setLabel);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_DELETED_ACTION, setLabel);
     }
 
     async addPostToSet(setId, postId) {
@@ -146,7 +146,7 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.POST_ADDED_ACTION, customSets[setId].label, [postId]);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.POST_ADDED_ACTION, customSets[setId].label, [postId]);
 
         return createdPost;
     }
@@ -169,7 +169,7 @@ class CustomSetStorage {
 
         customSets[setId].changedOn = Date.now();
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_POSTS_UPDATED_ACTION, customSets[setId].label, customSets[setId].posts);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_POSTS_UPDATED_ACTION, customSets[setId].label, customSets[setId].posts);
     }
 
     removePostFromSet(setId, postId) {
@@ -186,7 +186,7 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.POST_REMOVED_ACTION, customSets[setId].label, [postId]);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.POST_REMOVED_ACTION, customSets[setId].label, [postId]);
     }
 
     isPostAlreadyInSet(setId, postId) {
@@ -211,7 +211,7 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_NAME_CHANGED, oldLabel);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_NAME_CHANGED, oldLabel);
     }
 
     changeSetDescription(setId, newDescription) {
@@ -223,7 +223,7 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_DESCRIPTION_CHANGED, customSets[setId].label);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_DESCRIPTION_CHANGED, customSets[setId].label);
     }
 
     changeSetId(setId, newId) {
@@ -241,7 +241,7 @@ class CustomSetStorage {
         delete customSets[setId];
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_ID_CHANGED, customSets[setId].label);
+        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_ID_CHANGED, customSets[setId].label);
     }
 
 }
