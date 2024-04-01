@@ -120,7 +120,7 @@ class GitRepository {
     }
 
     async loadSetsFromRepository() {
-        const fileName = `e6OfflineSets_${this._userId}`;
+        const fileName = this.#createUserSetsFileName();
         const response = await GitAPIHelper.getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
@@ -136,41 +136,57 @@ class GitRepository {
         if (!this.isGitBackupEnabled())
             return;
 
-        const offlineSetFileContent = new CustomSetStorage(this._userId).getRawSetData();
-        const fileName = `e6OfflineSets_${this._userId}`;
+        try {
+            const rawSetData = new CustomSetStorage(this._userId).getRawSetData();
+            Object.keys(rawSetData).forEach(setId => {
+                rawSetData[setId].posts = rawSetData[setId].posts.map(post => post.postId);
+            });
 
-        const response = await GitAPIHelper.createGithubCommit(
-            this.getAccessToken(),
-            this.getUsername(),
-            this.getRepositoryName(),
-            this.getBranchName(),
-            this.#generateCommitMessage(action, setLabel, changedPosts),
-            offlineSetFileContent,
-            fileName
-        );
+            const fileName = this.#createUserSetsFileName();
 
-        return response;
+            const response = await GitAPIHelper.createGithubCommit(
+                this.getAccessToken(),
+                this.getUsername(),
+                this.getRepositoryName(),
+                this.getBranchName(),
+                this.#generateCommitMessage(action, setLabel, changedPosts),
+                rawSetData,
+                fileName
+            );
+
+            console.info("Offline sets successfully backed up in the defined GitHub repository!");
+            return response;
+        } catch (error) {
+            const errorMessage = `Error while saving changes to GIT! Message: ${error.message}`;
+            console.error(error);
+            UIHelper.displayErrorMessage(errorMessage);
+            throw Error(errorMessage);
+        }
+    }
+
+    #createUserSetsFileName() {
+        return `e6OfflineSets_${this._userId}.json`;
     }
 
     #generateCommitMessage(action, setLabel, changedPosts) {
         switch (action) {
-            case this.POST_ADDED_ACTION:
+            case GitRepository.POST_ADDED_ACTION:
                 return `Added post${changedPosts.length > 1 ? 's' : ''} '${changedPosts.join(", ")}' to the set '${setLabel}'`;
-            case this.POST_REMOVED_ACTION:
+            case GitRepository.POST_REMOVED_ACTION:
                 return `Removed post${changedPosts.length > 1 ? 's' : ''} '${changedPosts.join(", ")}' from the set '${setLabel}'`;
-            case this.SET_CREATED_ACTION:
+            case GitRepository.SET_CREATED_ACTION:
                 return `Created the set '${setLabel}'`;
-            case this.SET_DELETED_ACTION:
+            case GitRepository.SET_DELETED_ACTION:
                 return `Deleted the set '${setLabel}'`;
-            case this.SET_DESCRIPTION_CHANGED:
+            case GitRepository.SET_DESCRIPTION_CHANGED:
                 return `Changed the description of the set '${setLabel}'`;
-            case this.SET_NAME_CHANGED:
+            case GitRepository.SET_NAME_CHANGED:
                 return `Changed the name of the set '${setLabel}'`;
-            case this.SET_POSTS_UPDATED_ACTION:
+            case GitRepository.SET_POSTS_UPDATED_ACTION:
                 return `Updated posts of the set '${setLabel}', updated a total of ${changedPosts.length} post${changedPosts.length > 0 ? 's' : ''}`;
-            case this.SET_UPDATED_ACTION:
+            case GitRepository.SET_UPDATED_ACTION:
                 return `Updated set '${setLabel}' using backed up metadata`;
-            case this.SET_ID_CHANGED:
+            case GitRepository.SET_ID_CHANGED:
                 return `Changed the ID of set '${setLabel}'`;
         }
     }
