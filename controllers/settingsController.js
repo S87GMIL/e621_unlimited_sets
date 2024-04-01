@@ -3,6 +3,8 @@ class SettingsController extends SetBaseController {
     _createUiElements() {
         this._clearMainPage();
 
+        this._gitRepoInstance = new GitRepository(UserHelper.getCurrentUserId())
+
         document.title = `S87's offline sets - settings - e621`;
 
         const title = document.createElement("h2");
@@ -173,8 +175,7 @@ class SettingsController extends SetBaseController {
     }
 
     _createGitSettingSection(parentContainer) {
-        const gitRepoInstance = new GitRepository(UserHelper.getCurrentUserId());
-        const gitBackupEnabled = gitRepoInstance.isGitBackupEnabled();
+        const gitBackupEnabled = this._gitRepoInstance.isGitBackupEnabled();
 
         const gitSettingsSection = document.createElement("div");
         gitSettingsSection.style.marginTop = "40px";
@@ -191,11 +192,11 @@ class SettingsController extends SetBaseController {
         gitSettingsSection.appendChild(disableGitLabel);
 
         const inputElements = [
-            { element: 'input', type: "input", id: 'gitUsername', value: gitRepoInstance.getUsername(), label: 'GitHub Username' },
-            { element: 'input', type: "input", id: 'repoName', value: gitRepoInstance.getRepositoryName(), label: 'Repository Name' },
-            { element: 'input', type: "input", id: 'gitBranchName', value: gitRepoInstance.getBranchName(), label: 'Branch Name' },
+            { element: 'input', type: "input", id: 'gitUsername', value: this._gitRepoInstance.getUsername(), label: 'GitHub Username' },
+            { element: 'input', type: "input", id: 'repoName', value: this._gitRepoInstance.getRepositoryName(), label: 'Repository Name' },
+            { element: 'input', type: "input", id: 'gitBranchName', value: this._gitRepoInstance.getBranchName(), label: 'Branch Name', hint: "This should be the default branch of the repository, usually this is 'main'" },
             {
-                element: 'input', type: "password", id: 'accessToken', value: gitRepoInstance.getAccessToken(), label: 'Git Access Token',
+                element: 'input', type: "password", id: 'accessToken', value: this._gitRepoInstance.getAccessToken(), label: 'Git Access Token',
                 hint: `For security reasons, make sure to create an access token that can only change this one repository, and nothing else!<br />
             To learn more, and find out how to create an access token, click here: <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token">personal access token help</a><br />
             In case you are already logged into GitHub, you can jump directly to the personal access token creation by pressing this link: <a target="_blank" href="https://github.com/settings/personal-access-tokens/new">Create personal access token</a> ` }
@@ -219,9 +220,25 @@ class SettingsController extends SetBaseController {
         disableGitHint.innerText = "When disabled, changes made to offline sets will not be backed up to GitHub and should be manually backed up after a certain period of time";
         gitSettingsSection.appendChild(disableGitHint);
 
-
         gitSettingsSection.appendChild(gitInputFieldDiv);
         gitInputFieldDiv.style.display = gitBackupEnabled ? "block" : "none";
+
+        const synchronizeButton = document.createElement("button");
+        synchronizeButton.innerText = "Synchronize with Git";
+        synchronizeButton.className = "btn";
+        synchronizeButton.style.marginRight = "15px"
+        synchronizeButton.style.padding = "3px 8px";
+        synchronizeButton.addEventListener("click", event => {
+            event.preventDefault();
+            this.onSynchronizeWithGitPressed(synchronizeButton, this._gitRepoInstance);
+        });
+        gitInputFieldDiv.appendChild(synchronizeButton);
+
+        const synchronizeHint = document.createElement("p");
+        synchronizeHint.style.marginTop = "5px";
+        synchronizeHint.className = "hint";
+        synchronizeHint.innerText = `Synchronize the local files with the defined Git Repository`;
+        gitInputFieldDiv.appendChild(synchronizeHint);
 
         inputElements.forEach(input => {
             const inputDiv = document.createElement('div');
@@ -264,7 +281,7 @@ class SettingsController extends SetBaseController {
         submitButton.style.padding = "3px 8px";
         submitButton.addEventListener("click", event => {
             event.preventDefault();
-            this.onSaveGitSettingsPress(gitRepoInstance);
+            this.onSaveGitSettingsPress(this._gitRepoInstance);
         });
         gitSettingsSection.appendChild(submitButton);
 
@@ -354,7 +371,6 @@ class SettingsController extends SetBaseController {
         const button = event.target;
         const originalButtonText = button.innerText;
 
-        const setFile = this._uploadedFile;
         if (!this._uploadedFile) {
             UIHelper.displayErrorMessage("No file has been uploaded!");
             return;
@@ -363,28 +379,9 @@ class SettingsController extends SetBaseController {
         button.innerText = "Loading ...";
 
         try {
-            const userSetInstance = this.#getUserSets();
             this.#validateSetFile(this._uploadedFile);
 
-            const overwrittenSetCount = Object.keys(setFile).filter(setId => userSetInstance.hasSet(setId)).length;
-            const newSetCount = Object.keys(setFile).filter(setId => !userSetInstance.hasSet(setId)).length;
-
-            if (!overwrittenSetCount && !newSetCount) {
-                UIHelper.displayErrorMessage("The uploaded file doesn't contain any sets!");
-                return;
-            }
-
-            if (confirm(`Please confirm, that you want to replace '${overwrittenSetCount}' existing set${overwrittenSetCount > 1 ? 's' : ''}, and create '${newSetCount}' new set${newSetCount > 1 ? 's' : ''}`) !== true)
-                return;
-
-            Object.keys(setFile).forEach(setId => {
-                const set = setFile[setId];
-
-                if (!userSetInstance.hasSet(set.setId))
-                    userSetInstance.createSet(set.setId, set.label, set.description);
-            });
-
-            await this.#updateSetPosts(setFile);
+            await this.#synchronizeRemoteSetsWithLocalSets(this._uploadedFile);
 
             UIHelper.displaySuccessMessage("Set file has successfully been loaded and applied!");
         } catch (error) {
@@ -394,11 +391,37 @@ class SettingsController extends SetBaseController {
         button.innerText = originalButtonText;
     }
 
-    async #updateSetPosts(newSetMetaData, index = 0) {
+    async #synchronizeRemoteSetsWithLocalSets(remoteSets, saveToGit) {
+        const userSetInstance = this.#getUserSets();
+        const overwrittenSetCount = Object.keys(remoteSets).filter(setId => userSetInstance.hasSet(setId)).length;
+        const newSetCount = Object.keys(remoteSets).filter(setId => !userSetInstance.hasSet(setId)).length;
+
+        if (!overwrittenSetCount && !newSetCount) {
+            UIHelper.displayErrorMessage("The uploaded file doesn't contain any sets!");
+            return;
+        }
+
+        if (confirm(`Please confirm, that you want to replace '${overwrittenSetCount}' existing set${overwrittenSetCount > 1 ? 's' : ''}, and create '${newSetCount}' new set${newSetCount > 1 ? 's' : ''}`) !== true)
+            return;
+
+        Object.keys(remoteSets).forEach(setId => {
+            const set = remoteSets[setId];
+
+            if (!userSetInstance.hasSet(set.setId))
+                userSetInstance.createSet(set.setId, set.label, set.description);
+        });
+
+        await this.#updateSetPosts(remoteSets, 0, saveToGit);
+    }
+
+    async #updateSetPosts(newSetMetaData, index = 0, saveToGit = true) {
         return new Promise(async (resolve, reject) => {
             try {
                 const setId = Object.keys(newSetMetaData)[index];
                 if (!setId) {
+                    if (saveToGit)
+                        await this._gitRepoInstance.saveChangesToRepository(GitRepository.BACKUP_SYNCHRONIZED);
+
                     resolve();
                     return;
                 }
@@ -410,8 +433,7 @@ class SettingsController extends SetBaseController {
                 }
 
                 this.#getSetStorageInstance().updateSetFromMetadata(setId, setMetaData);
-
-                await this.#updateSetPosts(newSetMetaData, index + 1);
+                await this.#updateSetPosts(newSetMetaData, index + 1, saveToGit);
                 resolve()
             } catch (error) {
                 reject(error);
@@ -439,15 +461,32 @@ class SettingsController extends SetBaseController {
             return;
         }
 
-        gitRepoInstance.setGitBackupEnabled(gitBackupEnabled);
+        this._gitRepoInstance.setGitBackupEnabled(gitBackupEnabled);
 
         if (gitBackupEnabled) {
-            gitRepoInstance.setUsername(gitUsername);
-            gitRepoInstance.setAccessToken(gitAccessToken);
-            gitRepoInstance.setRepositoryName(gitRepoName);
-            gitRepoInstance.setBranchName(branchName);
+            this._gitRepoInstance.setUsername(gitUsername);
+            this._gitRepoInstance.setAccessToken(gitAccessToken);
+            this._gitRepoInstance.setRepositoryName(gitRepoName);
+            this._gitRepoInstance.setBranchName(branchName);
         }
 
         UIHelper.displaySuccessMessage("GitHub settings saved!");
+    }
+
+    async onSynchronizeWithGitPressed(synchronizeButton) {
+        const originalButtonText = synchronizeButton.innerText;
+
+        synchronizeButton.innerText = "Synchronizing ...";
+
+        try {
+            const gitUserSets = await this._gitRepoInstance.loadGitUserSets();
+            await this.#synchronizeRemoteSetsWithLocalSets(gitUserSets, false);
+
+            UIHelper.displaySuccessMessage("Local sets have successfully been synchronized with the Git repository!");
+        } catch (error) {
+            UIHelper.displayErrorMessage(error.message);
+        }
+
+        synchronizeButton.innerText = originalButtonText;
     }
 }

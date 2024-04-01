@@ -109,7 +109,6 @@ class CustomSetStorage {
         };
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_UPDATED_ACTION, setMetadata.label, setMetadata.posts);
 
         return customSets[setId];
     }

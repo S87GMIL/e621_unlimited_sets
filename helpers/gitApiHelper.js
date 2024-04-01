@@ -31,23 +31,14 @@ class GitAPIHelper {
 
     static async getFileFromGit(githubAccessToken, gitUsername, repoName, branchName, fileName) {
         const repoFullName = `${gitUsername}/${repoName}`;
-        const tree = await this.#createGithubRepoTree(githubAccessToken, repoFullName, branchName, offlineSetFile, fileName);
-        const parentSha = await this.#getParentSha(githubAccessToken, repoFullName, branchName);
-
-        const payload = {
-            "message": commitMessage,
-            "tree": tree,
-            "parents": [parentSha]
-        };
 
         const response = await this.#performCrossOriginRequest(
             "GET",
-            `https://api.github.com/repos/${repoFullName}/git/commits/${parentSha}`,
+            `https://api.github.com/repos/${repoFullName}/contents/${fileName}`,
             this.#getApiHeaders(githubAccessToken)
         );
 
-        const lastCommitContent = await response.json();
-        return lastCommitContent;
+        return JSON.parse(atob(response.content));
     }
 
     static #performCrossOriginRequest(method, url, headers = {}, body) {

@@ -8,6 +8,7 @@ class GitRepository {
     static SET_UPDATED_ACTION = "set_updated";
     static SET_POSTS_UPDATED_ACTION = "set_posts_updated";
     static SET_META_DATA_UPDATED_ACTION = "set_meta_data_updated";
+    static BACKUP_SYNCHRONIZED = "set_backup_synchronized";
 
     static POST_ADDED_ACTION = "post_added";
     static POST_REMOVED_ACTION = "post_removed";
@@ -166,6 +167,18 @@ class GitRepository {
         }
     }
 
+    async loadGitUserSets() {
+        const response = await GitAPIHelper.getFileFromGit(
+            this.getAccessToken(),
+            this.getUsername(),
+            this.getRepositoryName(),
+            this.getBranchName(),
+            this.#createUserSetsFileName()
+        );
+
+        return response;
+    }
+
     #createUserSetsFileName() {
         return `e6OfflineSets_${this._userId}.json`;
     }
@@ -192,6 +205,8 @@ class GitRepository {
                 return `Changed the ID of set '${setLabel}'`;
             case GitRepository.SET_META_DATA_UPDATED_ACTION:
                 return `Updated the metadata of the set '${setLabel}'`;
+            case GitRepository.BACKUP_SYNCHRONIZED:
+                return `Sets have been synchronized from a loaded backup file`;
             default:
                 return `Updated the set '${setLabel}'`;
         }
