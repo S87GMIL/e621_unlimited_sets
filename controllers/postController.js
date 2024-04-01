@@ -41,7 +41,8 @@ class PostController {
     #replaceSetQueryNavigator() {
         //Simply hide the set query for now because it can be very complicated especially when combining multiple offline sets
         const noSetQueryNavigator = document.querySelector("#nav-links-top > div.search-seq-nav");
-        noSetQueryNavigator.style.display = "none";
+        if (noSetQueryNavigator)
+            noSetQueryNavigator.style.display = "none";
     }
 
     #createSetNavElement(setInstance) {
