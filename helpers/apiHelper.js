@@ -1,4 +1,4 @@
-class ApiHelper {
+class E6ApiHelper {
 
     static async #performRequest(method, path, body = {}) {
         return new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ class ApiHelper {
             throw Error(`Posts couldn't be loaded in bulk!`);
 
         let loadedPosts = response.posts;
-        loadedPosts = loadedPosts.concat(await ApiHelper.loadBulkPost(requestPostIds, batch + 1, batchSize));
+        loadedPosts = loadedPosts.concat(await E6ApiHelper.loadBulkPost(requestPostIds, batch + 1, batchSize));
 
         return loadedPosts;
     }

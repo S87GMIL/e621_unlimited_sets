@@ -282,7 +282,7 @@ class SettingsController extends SetBaseController {
 
                 const setMetaData = newSetMetaData[setId];
                 if (setMetaData.posts.length > 0) {
-                    const loadedPosts = await ApiHelper.loadBulkPost(setMetaData.posts);
+                    const loadedPosts = await E6ApiHelper.loadBulkPost(setMetaData.posts);
                     setMetaData.posts = loadedPosts.map(post => CustomSetStorage.createPostMetadata(post.id, post));
                 }
 

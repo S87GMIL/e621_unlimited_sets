@@ -7,14 +7,15 @@ class CustomSetStorage {
             throw new Error("No user ID was passed!");
 
         this._userId = userId;
+        this._gitRepoInstance = new GitRepository();
     }
 
-    #createUsersetsKey() {
+    #createUserSetsKey() {
         return this.CUSTOM_SET_KEY_PREFIX + this._userId;
     }
 
     #getCustomSets() {
-        return this._customSets = StorageHelper.getValue(this.#createUsersetsKey()) || {};
+        return this._customSets = StorageHelper.getValue(this.#createUserSetsKey()) || {};
     }
 
     #getSet(setId) {
@@ -78,7 +79,8 @@ class CustomSetStorage {
             posts: []
         };
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_CREATED_ACTION, label);
 
         return customSets[setId];
     }
@@ -106,7 +108,9 @@ class CustomSetStorage {
             posts: setMetadata.posts
         };
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_UPDATED_ACTION, setMetadata.label, setMetadata.posts);
+
         return customSets[setId];
     }
 
@@ -115,6 +119,8 @@ class CustomSetStorage {
         if (!customSets[setId])
             throw Error(`No set with the ID '${setId}' exists!`);
 
+        const setLabel = customSets[setId].label;
+
         if (!this.DELETION_MODE) {
             customSets[setId].deleted = true;
             customSets[setId].deletedOn = Date.now();
@@ -122,7 +128,8 @@ class CustomSetStorage {
             delete customSets[setId];
         }
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_DELETED_ACTION, setLabel);
     }
 
     async addPostToSet(setId, postId) {
@@ -133,12 +140,13 @@ class CustomSetStorage {
         if (this.isPostAlreadyInSet(setId, postId))
             throw Error(`The post '${postId}' has already been added to set '${customSets[setId].label}'`)
 
-        const postData = await ApiHelper.getPost(postId);
+        const postData = await E6ApiHelper.getPost(postId);
         const createdPost = CustomSetStorage.createPostMetadata(postId, postData);
         customSets[setId].posts.push(createdPost);
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.POST_ADDED_ACTION, customSets[setId].label, [postId]);
 
         return createdPost;
     }
@@ -160,7 +168,8 @@ class CustomSetStorage {
         })
 
         customSets[setId].changedOn = Date.now();
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_POSTS_UPDATED_ACTION, customSets[setId].label, customSets[setId].posts);
     }
 
     removePostFromSet(setId, postId) {
@@ -176,7 +185,8 @@ class CustomSetStorage {
         customSets[setId].posts = filteredPosts;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.POST_REMOVED_ACTION, customSets[setId].label, [postId]);
     }
 
     isPostAlreadyInSet(setId, postId) {
@@ -196,10 +206,12 @@ class CustomSetStorage {
         if (!customSets[setId] || customSets[setId].deleted)
             throw Error(`No set with the ID '${setId}' exists!`);
 
+        const oldLabel = customSets[setId].label;
         customSets[setId].label = newLabel;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_NAME_CHANGED, oldLabel);
     }
 
     changeSetDescription(setId, newDescription) {
@@ -210,7 +222,8 @@ class CustomSetStorage {
         customSets[setId].description = newDescription;
         customSets[setId].changedOn = Date.now();
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_DESCRIPTION_CHANGED, customSets[setId].label);
     }
 
     changeSetId(setId, newId) {
@@ -227,7 +240,8 @@ class CustomSetStorage {
         customSets[newId] = customSets[setId];
         delete customSets[setId];
 
-        StorageHelper.saveValue(this.#createUsersetsKey(), customSets);
+        StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
+        this._gitRepoInstance.saveChangesToRepository(this._userId, GitRepository.SET_ID_CHANGED, customSets[setId].label);
     }
 
 }

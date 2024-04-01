@@ -51,7 +51,7 @@ class CustomSetPostListController extends SetEditingBaseController {
 
     async #updateSetPosts(postIds) {
         try {
-            const updatedPosts = await ApiHelper.loadBulkPost(postIds);
+            const updatedPosts = await E6ApiHelper.loadBulkPost(postIds);
             this._setInstance.updatePosts(updatedPosts);
             UIHelper.displaySuccessMessage("All posts in the current set have been update!");
         } catch (error) {

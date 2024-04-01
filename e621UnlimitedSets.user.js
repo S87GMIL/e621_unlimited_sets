@@ -10,7 +10,8 @@
 // @downloadURL  https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/main/e621UnlimitedSets.user.js
 // @icon64       https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/e6_s87_logo.png
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/storageHelper.js
-// @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/apiHelper.js
+// @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/e6ApiHelper.js
+// @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/gitApiHelper.js
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/uiHelper.js
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/userHelper.js
 // @require      https://raw.githubusercontent.com/S87GMIL/e621_unlimited_sets/v0.9.0-beta/helpers/backupReminderHelper.js

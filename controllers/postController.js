@@ -182,7 +182,7 @@ class PostController {
                 const customSet = this.#getUserSetInstance().getSet(userSetDropdown.value);
                 await customSet.addPost(postId);
             } else {
-                await ApiHelper.addPostToSet(userSetDropdown.value, postId);
+                await E6ApiHelper.addPostToSet(userSetDropdown.value, postId);
             }
 
             UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSet.innerText}'`);

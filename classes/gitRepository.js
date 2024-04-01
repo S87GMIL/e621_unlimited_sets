@@ -2,9 +2,11 @@ class GitRepository {
 
     static SET_CREATED_ACTION = "set_created";
     static SET_DELETED_ACTION = "set_deleted";
-    static SET_DELETED_ACTION = "set_deleted";
     static SET_NAME_CHANGED = "set_name_changed";
+    static SET_ID_CHANGED = "set_id_changed";
     static SET_DESCRIPTION_CHANGED = "set_description_changed";
+    static SET_UPDATED_ACTION = "set_updated";
+    static SET_POSTS_UPDATED_ACTION = "set_posts_updated";
 
     static POST_ADDED_ACTION = "post_added";
     static POST_REMOVED_ACTION = "post_removed";
@@ -12,8 +14,11 @@ class GitRepository {
     constructor() {
         const gitSettings = this.#getUserGitSettings();
 
-        this._repoUrl = gitSettings.repositoryUrl;
+        this._gitUsername = gitSettings.username;
+        this._repoName = gitSettings.repositoryName;
+        this._branchName = gitSettings.branchName;
         this._accessToken = gitSettings.accessToken;
+        this._gitBackupEnabled = gitSettings.gitEnabled;
     }
 
     #createGitUserSettingsKey() {
@@ -34,11 +39,37 @@ class GitRepository {
         return this._gitSettings;
     }
 
-    #createSettingsJson(repoUrl = this._repoUrl, accessToken = this._accessToken) {
+    #createSettingsJson(repoName = this._repoName, branchName = this._branchName, username = this._gitUsername, accessToken = this._accessToken, gitEnabled = this._gitBackupEnabled) {
         return {
-            repositoryUrl: repoUrl || "",
-            accessToken: accessToken || ""
+            gitEnabled: gitEnabled || false,
+            repositoryName: repoName || "",
+            branchName: branchName || "",
+            accessToken: accessToken || "",
+            username: username || "",
         };
+    }
+
+    isGitBackupEnabled() {
+        return this.#getUserGitSettings().gitEnabled;
+    }
+
+    setGitBackupEnabled(enabled) {
+        this._gitBackupEnabled = enabled;
+
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryName(), this.getBranchName(), this.getUsername(), this.getAccessToken(), enabled));
+    }
+
+    getUsername() {
+        return this._gitUsername;
+    }
+
+    setUsername(username) {
+        if (!username)
+            throw Error("No username was passed!");
+
+        this._gitUsername = username;
+
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryName(), this.getBranchName(), username, this.getAccessToken(), this.isGitBackupEnabled()));
     }
 
     getAccessToken() {
@@ -51,40 +82,78 @@ class GitRepository {
 
         this._accessToken = accessToken;
 
-        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryUrl(), accessToken));
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryName(), this.getBranchName(), this.getUsername(), accessToken, this.isGitBackupEnabled()));
     }
 
     hasAccessToken() {
         return !!this._accessToken;
     }
 
-    getRepositoryUrl() {
-        return this._repoUrl;
+    getRepositoryName() {
+        return this._repoName;
     }
 
-    setRepositoryUrl(repositoryUrl) {
-        if (!repositoryUrl)
-            throw Error("No repository URL was passed!");
+    setRepositoryName(repositoryName) {
+        if (!repositoryName)
+            throw Error("No repository name was passed!");
 
-        this._repoUrl = repositoryUrl;
+        this._repoName = repositoryName;
 
-        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(repositoryUrl, this.getAccessToken()));
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(repositoryName, this.getBranchName(), this.getUsername(), this.getAccessToken(), this.isGitBackupEnabled()));
     }
 
-    loadSetsFromRepository() {
-        //TODO: Implement logic to pull data from a repository
+    getBranchName() {
+        return this._branchName;
     }
 
-    saveSetsToRepository() {
-        //TODO: Implement logic to push data to a repository
+    setBranchName(branchName) {
+        if (!branchName)
+            throw Error("No branch name was passed!");
+
+        this._branchName = branchName;
+
+        StorageHelper.saveValue(this.#createGitUserSettingsKey(), this.#createSettingsJson(this.getRepositoryName(), this._branchName, this.getUsername(), this.getAccessToken(), this.isGitBackupEnabled()));
     }
 
-    #generateCommitMesage(action, setLabel, addedPosts) {
+    async loadSetsFromRepository(userId) {
+        const fileName = `e6OfflineSets_${userId}`;
+        const response = await GitAPIHelper.getFileFromGit(
+            this.getAccessToken(),
+            this.getUsername(),
+            this.getRepositoryName(),
+            this.getBranchName(),
+            fileName
+        );
+
+        return response;
+    }
+
+    async saveChangesToRepository(userId, action, setLabel, changedPosts) {
+        if (!this.isGitBackupEnabled())
+            return;
+
+        const offlineSetFileContent = new CustomSetStorage(userId).getRawSetData();
+        const fileName = `e6OfflineSets_${userId}`;
+
+        const response = await GitAPIHelper.createGithubCommit(
+            this.getAccessToken(),
+            this.getUsername(),
+            this.getRepositoryName(),
+            this.getBranchName(),
+            this.#generateCommitMessage(action, setLabel, changedPosts),
+            offlineSetFileContent,
+            fileName
+        );
+
+        return response;
+    }
+
+    #generateCommitMessage(action, setLabel, changedPosts) {
         switch (action) {
             case this.POST_ADDED_ACTION:
-                return `Added post${addedPosts.length > 1 ? 's' : ''} '${addedPosts.join(", ")}' to the set '${setLabel}'`;
+                return `Added post${changedPosts.length > 1 ? 's' : ''} '${changedPosts.join(", ")}' to the set '${setLabel}'`;
             case this.POST_REMOVED_ACTION:
-                return `Removed post${addedPosts.length > 1 ? 's' : ''} '${addedPosts.join(", ")}' from the set '${setLabel}'`;
+                return `Removed post${changedPosts.length > 1 ? 's' : ''} '${changedPosts.join(", ")}' from the set '${setLabel}'`;
             case this.SET_CREATED_ACTION:
                 return `Created the set '${setLabel}'`;
             case this.SET_DELETED_ACTION:
@@ -93,18 +162,12 @@ class GitRepository {
                 return `Changed the description of the set '${setLabel}'`;
             case this.SET_NAME_CHANGED:
                 return `Changed the name of the set '${setLabel}'`;
+            case this.SET_POSTS_UPDATED_ACTION:
+                return `Updated posts of the set '${setLabel}', updated a total of ${changedPosts.length} post${changedPosts.length > 0 ? 's' : ''}`;
+            case this.SET_UPDATED_ACTION:
+                return `Updated set '${setLabel}' using backed up metadata`;
+            case this.SET_ID_CHANGED:
+                return `Changed the ID of set '${setLabel}'`;
         }
-    }
-
-    async #performRequest(method, url, body) {
-        const response = await GM.xmlHttpRequest({
-            method: method,
-            url: url,
-            headers: body ? {
-                "Content-Type": "application/json"
-            } : {},
-            data: body || {}
-        });
-        return response;
     }
 }
