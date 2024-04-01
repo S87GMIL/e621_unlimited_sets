@@ -66,7 +66,7 @@ class SettingsController extends SetBaseController {
 
             const uploadedFileString = await this.#loadFile(fileUploader.files[0], progressBar);
             try {
-                this._uplaodedFile = JSON.parse(uploadedFileString);
+                this._uploadedFile = JSON.parse(uploadedFileString);
             } catch (error) {
                 UIHelper.displayErrorMessage("The uploaded file is not a valid JSON file or contains errors!");
                 console.error(error);
@@ -89,15 +89,15 @@ class SettingsController extends SetBaseController {
         applyHint.innerText = "This will overwrite all offline sets of the current user with the sets defined in the uploaded file";
         formElement.appendChild(applyHint);
 
-        const backupSettignsDiv = document.createElement("div");
-        backupSettignsDiv.style.marginTop = "35px";
-        formElement.appendChild(backupSettignsDiv);
+        const backupSettingsDiv = document.createElement("div");
+        backupSettingsDiv.style.marginTop = "35px";
+        formElement.appendChild(backupSettingsDiv);
 
         const backupSettingsTitle = document.createElement("h2");
         backupSettingsTitle.innerText = "Backup Settings";
-        backupSettignsDiv.appendChild(backupSettingsTitle);
+        backupSettingsDiv.appendChild(backupSettingsTitle);
 
-        backupSettignsDiv.appendChild(document.createElement("br"));
+        backupSettingsDiv.appendChild(document.createElement("br"));
 
         const reminderHelperInstance = new BackupReminderHelper(UserHelper.getCurrentUserId());
         const reminderDisabled = reminderHelperInstance.getReminderDisabled();
@@ -107,7 +107,7 @@ class SettingsController extends SetBaseController {
         const disableReminderLabel = document.createElement("label");
         disableReminderLabel.className = "string optional";
         disableReminderLabel.innerText = "Disable backup reminder";
-        backupSettignsDiv.appendChild(disableReminderLabel);
+        backupSettingsDiv.appendChild(disableReminderLabel);
 
         const disableReminderCheckbox = document.createElement("input");
         disableReminderCheckbox.type = "checkbox";
@@ -115,34 +115,34 @@ class SettingsController extends SetBaseController {
         disableReminderCheckbox.id = "disableReminderCheckbox";
         disableReminderCheckbox.style.marginLeft = "8px";
         disableReminderCheckbox.addEventListener("change", () => reminderPeriodInput.disabled = disableReminderCheckbox.checked)
-        backupSettignsDiv.appendChild(disableReminderCheckbox);
+        backupSettingsDiv.appendChild(disableReminderCheckbox);
 
-        const disableReminderhint = document.createElement("p");
-        disableReminderhint.style.marginTop = "5px";
-        disableReminderhint.className = "hint";
-        disableReminderhint.innerText = "Prevents the backup reminder from showing up entirely";
-        backupSettignsDiv.appendChild(disableReminderhint);
+        const disableReminderHint = document.createElement("p");
+        disableReminderHint.style.marginTop = "5px";
+        disableReminderHint.className = "hint";
+        disableReminderHint.innerText = "Prevents the backup reminder from showing up entirely";
+        backupSettingsDiv.appendChild(disableReminderHint);
 
-        const reminderPeridoLabel = document.createElement("label");
-        reminderPeridoLabel.className = "string optional";
-        reminderPeridoLabel.innerText = "Disable backup reminder (Days)";
-        reminderPeridoLabel.style.display = "block";
-        reminderPeridoLabel.style.marginTop = "15px";
-        backupSettignsDiv.appendChild(reminderPeridoLabel);
+        const reminderPeriodLabel = document.createElement("label");
+        reminderPeriodLabel.className = "string optional";
+        reminderPeriodLabel.innerText = "Disable backup reminder (Days)";
+        reminderPeriodLabel.style.display = "block";
+        reminderPeriodLabel.style.marginTop = "15px";
+        backupSettingsDiv.appendChild(reminderPeriodLabel);
 
         reminderPeriodInput.type = "number";
         reminderPeriodInput.id = "reminderPeriodInput";
-        reminderPeriodInput.value = reminderHelperInstance.getRemidnerPeriod();
+        reminderPeriodInput.value = reminderHelperInstance.getreminderPeriod();
         reminderPeriodInput.disabled = reminderDisabled;
-        backupSettignsDiv.appendChild(reminderPeriodInput);
+        backupSettingsDiv.appendChild(reminderPeriodInput);
 
         const periodHint = document.createElement("p");
         periodHint.style.marginTop = "5px";
         periodHint.className = "hint";
         periodHint.innerText = "The period after which a reminder will be shown, in case no backup has been made since";
-        backupSettignsDiv.appendChild(periodHint);
+        backupSettingsDiv.appendChild(periodHint);
 
-        backupSettignsDiv.appendChild(document.createElement("br"));
+        backupSettingsDiv.appendChild(document.createElement("br"));
 
         const saveButton = document.createElement("button");
         saveButton.innerText = "Save Backup Settings"
@@ -152,10 +152,10 @@ class SettingsController extends SetBaseController {
             event.preventDefault();
             this._saveReminderSettings(reminderHelperInstance, reminderPeriodInput.value, disableReminderCheckbox.checked)
         });
-        backupSettignsDiv.appendChild(saveButton);
+        backupSettingsDiv.appendChild(saveButton);
     }
 
-    #loadFile(uplaodedFile, progressBar) {
+    #loadFile(uploadedFile, progressBar) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
@@ -169,7 +169,7 @@ class SettingsController extends SetBaseController {
             }, false);
 
             reader.onload = evt => resolve(evt.target.result);
-            reader.readAsBinaryString(uplaodedFile);
+            reader.readAsBinaryString(uploadedFile);
         });
     }
 
@@ -181,10 +181,10 @@ class SettingsController extends SetBaseController {
     }
 
     #getSetStorageInstance() {
-        if (!this._setStoreageInstance)
-            this._setStoreageInstance = new CustomSetStorage(UserHelper.getCurrentUserId());
+        if (!this._setStorageInstance)
+            this._setStorageInstance = new CustomSetStorage(UserHelper.getCurrentUserId());
 
-        return this._setStoreageInstance;
+        return this._setStorageInstance;
     }
 
     onSaveSettingsPress() {
@@ -200,14 +200,14 @@ class SettingsController extends SetBaseController {
         });
 
         const setDataString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rawSetData));
-        const donwloadAnchor = document.createElement('a');
-        donwloadAnchor.setAttribute("href", setDataString);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", setDataString);
 
         const date = new Date();
         const currentDateString = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
 
-        donwloadAnchor.setAttribute("download", `offline_sets_${UserHelper.getCurrentUserId()}_${currentDateString}.json`);
-        donwloadAnchor.click();
+        downloadAnchor.setAttribute("download", `offline_sets_${UserHelper.getCurrentUserId()}_${currentDateString}.json`);
+        downloadAnchor.click();
 
         new BackupReminderHelper(UserHelper.getCurrentUserId()).setLastBackupDate(new Date());
     }
@@ -222,7 +222,7 @@ class SettingsController extends SetBaseController {
                 throw Error(`set with ID '${setId}' does not contain a valid object!`);
 
             if (!set.setId || !set.label || !set.posts || !Array.isArray(set.posts))
-                throw Error(`The set '${setId}' has an invbalid internal structure!`);
+                throw Error(`The set '${setId}' has an invalid internal structure!`);
         });
     }
 
@@ -231,8 +231,8 @@ class SettingsController extends SetBaseController {
         const button = event.target;
         const originalButtonText = button.innerText;
 
-        const setFile = this._uplaodedFile;
-        if (!this._uplaodedFile) {
+        const setFile = this._uploadedFile;
+        if (!this._uploadedFile) {
             UIHelper.displayErrorMessage("No file has been uploaded!");
             return;
         }
@@ -241,13 +241,13 @@ class SettingsController extends SetBaseController {
 
         try {
             const userSetInstance = this.#getUserSets();
-            this.#validateSetFile(this._uplaodedFile);
+            this.#validateSetFile(this._uploadedFile);
 
             const overwrittenSetCount = Object.keys(setFile).filter(setId => userSetInstance.hasSet(setId)).length;
             const newSetCount = Object.keys(setFile).filter(setId => !userSetInstance.hasSet(setId)).length;
 
             if (!overwrittenSetCount && !newSetCount) {
-                UIHelper.displayErrorMessage("The uplaoded file doesn't contain any sets!");
+                UIHelper.displayErrorMessage("The uploaded file doesn't contain any sets!");
                 return;
             }
 
@@ -296,8 +296,8 @@ class SettingsController extends SetBaseController {
         });
     }
 
-    _saveReminderSettings(reminderHelper, remidnerPeriod, disableReminder) {
-        reminderHelper.setReminderPeriod(remidnerPeriod);
+    _saveReminderSettings(reminderHelper, reminderPeriod, disableReminder) {
+        reminderHelper.setReminderPeriod(reminderPeriod);
         reminderHelper.setReminderDisabled(disableReminder);
 
         UIHelper.displaySuccessMessage("Reminder settings saved!");
