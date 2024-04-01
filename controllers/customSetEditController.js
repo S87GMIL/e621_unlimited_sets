@@ -1,8 +1,14 @@
 class CustomSetEditController extends SetEditingBaseController {
 
+    constructor(setId) {
+        super(setId);
+
+        this._gitRepoInstance = new GitRepository(UserHelper.getCurrentUserId());
+    }
+
     _createSetSpecificElements() {
         this._clearMainPage();
-        
+
         document.title = `Edit Set - ${this._setInstance.getLabel()} - e621`;
 
         const title = document.createElement("h2");
@@ -57,7 +63,7 @@ class CustomSetEditController extends SetEditingBaseController {
         submitButton.className = "btn";
         submitButton.addEventListener("click", event => {
             event.preventDefault();
-            this.#onSetUpdatedPress();
+            this.#onSetUpdatedPress(submitButton);
         });
 
         formElement.appendChild(submitButton);
@@ -65,8 +71,10 @@ class CustomSetEditController extends SetEditingBaseController {
         this._getMainPageElement().appendChild(sectionElement);
     }
 
-    #onSetUpdatedPress() {
+    async #onSetUpdatedPress(submitButton) {
         try {
+            const originalText = submitButton.innerText;
+
             const newName = document.getElementById("name").value;
             const newId = document.getElementById("id").value;
             const newDescription = document.getElementById("description").value;
@@ -83,7 +91,8 @@ class CustomSetEditController extends SetEditingBaseController {
                 return;
             }
 
-            if (this._setInstance.getLabel() !== newName)
+            const oldLabel = this._setInstance.getLabel();
+            if (oldLabel !== newName)
                 this._setInstance.setLabel(newName);
 
             if (this._setInstance.getDescription() !== newDescription)
@@ -93,6 +102,15 @@ class CustomSetEditController extends SetEditingBaseController {
                 this._setInstance.setId(newId);
                 idChanged = true;
             }
+
+            submitButton.innerText = "Saving ...";
+            try {
+                await this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_META_DATA_UPDATED_ACTION, oldLabel);
+            } catch (error) {
+                submitButton.innerText = originalText;
+                return;
+            }
+            submitButton.innerText = originalText;
 
             UIHelper.displaySuccessMessage("The set has successfully been updated!");
             if (idChanged)

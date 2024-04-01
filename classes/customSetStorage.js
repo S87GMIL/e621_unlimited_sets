@@ -97,7 +97,7 @@ class CustomSetStorage {
             throw Error(`No set with the ID '${setId}' exists!`);
 
         if (!setMetadata.setId || !setMetadata.label || !setMetadata.createdOn || !Array.isArray(setMetadata.posts))
-            throw Error(`The passed set meta data for set '${setId}' is not valid!`);
+            throw Error(`The passed set metadata for set '${setId}' is not valid!`);
 
         customSets[setId] = {
             setId: setMetadata.setId,
@@ -211,7 +211,6 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_NAME_CHANGED, oldLabel);
     }
 
     changeSetDescription(setId, newDescription) {
@@ -223,7 +222,6 @@ class CustomSetStorage {
         customSets[setId].changedOn = Date.now();
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_DESCRIPTION_CHANGED, customSets[setId].label);
     }
 
     changeSetId(setId, newId) {
@@ -241,7 +239,6 @@ class CustomSetStorage {
         delete customSets[setId];
 
         StorageHelper.saveValue(this.#createUserSetsKey(), customSets);
-        this._gitRepoInstance.saveChangesToRepository(GitRepository.SET_ID_CHANGED, customSets[setId].label);
     }
 
 }

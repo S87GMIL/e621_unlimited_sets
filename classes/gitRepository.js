@@ -7,6 +7,7 @@ class GitRepository {
     static SET_DESCRIPTION_CHANGED = "set_description_changed";
     static SET_UPDATED_ACTION = "set_updated";
     static SET_POSTS_UPDATED_ACTION = "set_posts_updated";
+    static SET_META_DATA_UPDATED_ACTION = "set_meta_data_updated";
 
     static POST_ADDED_ACTION = "post_added";
     static POST_REMOVED_ACTION = "post_removed";
@@ -157,7 +158,7 @@ class GitRepository {
             console.info("Offline sets successfully backed up in the defined GitHub repository!");
             return response;
         } catch (error) {
-            const errorMessage = `Error while saving changes to GIT, make sure that all settings re correct! Message: ${error.message}`;
+            const errorMessage = `Error while saving changes to GIT, make sure that all settings are correct! Message: ${error.message}`;
             console.error(error);
             UIHelper.displayErrorMessage(errorMessage);
 
@@ -189,6 +190,10 @@ class GitRepository {
                 return `Updated set '${setLabel}' using backed up metadata`;
             case GitRepository.SET_ID_CHANGED:
                 return `Changed the ID of set '${setLabel}'`;
+            case GitRepository.SET_META_DATA_UPDATED_ACTION:
+                return `Updated the metadata of the set '${setLabel}'`;
+            default:
+                return `Updated the set '${setLabel}'`;
         }
     }
 }

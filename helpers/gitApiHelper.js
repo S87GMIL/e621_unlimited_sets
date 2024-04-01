@@ -118,13 +118,7 @@ class GitAPIHelper {
 
     static async #createGithubRepoTree(githubAccessToken, repoFullName, branchName, offlineSetFile, fileName) {
         let shaForBaseTree;
-        try {
-            shaForBaseTree = await this.#getShaForBaseTree(githubAccessToken, repoFullName, branchName);
-        } catch (error) {
-            //Only ignore the "tree empty" error, it's not possible to proceed with any other error
-            if (error.message !== "Not Found")
-                throw error;
-        }
+        shaForBaseTree = await this.#getShaForBaseTree(githubAccessToken, repoFullName, branchName);
 
         const tree = []
 
