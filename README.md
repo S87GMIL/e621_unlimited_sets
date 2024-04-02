@@ -7,7 +7,9 @@ Once installed, simply follow this [link](https://github.com/S87GMIL/e621_unlimi
 
 This user script allows you to create an unlimited amount of so-called "offline sets" These sets are only saved on your device and not the e6 servers.<br>
 Because nothing is saved on the e6 servers, it is possible to circumvent the imposed set limit, without breaching any site rules or exploiting the site's API.<br>
-This also means, that the offline sets created are only available on the device on which they were created, unless the user manually downloads a backup of the offline sets and uploads it to another device.<br><br>
+This also means, that the offline sets created are only available on the device on which they were created, unless the user manually downloads a backup of the offline sets and uploads it to another device, unless utilizing the GitHub integration.<br>
+The GitHub integration allows users to define a GitHub repository in which all changes made to the offline sets will be saved; this also allows the use of offline sets across multiple devices.
+<br><br>
 
 Usage of the offline sets should be as easy and intuitive as possible; this is why they are directly integrated in the standard set pages and will behave just like regular e6 sets.
 
@@ -39,6 +41,13 @@ The user script has a function to remind users to back up the created offline se
 By default, the user will be reminded after 30 days to back up any created sets; however, this value can be changed to any amount of days or even disabled entirely by checking the "Disable backup reminder" checkbox.
 
 <image src="./readme_images/offline_set_settings.png" style="box-shadow: 0px 0px 10px black;"><br> 
+
+### GitHub Settings
+
+It is also possible to connect a GitHub repository, so that every update to the offline user sets will automatically be committed to the defined GitHub repository.<br />
+When enabled, it is also possible to share offline sets across multiple devices, by simply pressing the "Synchronize with Git" button, and automatically applying the current version in the defined GitHub repository.<br />
+This will attempt to merge the local sets with the sets in the Git repository by adding posts, which are present in the repo but no in the local files, and vise versa.<br />
+<image src="./readme_images/offline_set_settings_github.png" style="box-shadow: 0px 0px 10px black;"><br> 
 
 ## My set page
 

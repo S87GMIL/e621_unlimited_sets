@@ -85,7 +85,7 @@ class PostOverviewController {
                         const customSet = this.#getUserSetInstance().getSet(setDropdown.value);
                         await customSet.addPost(postId);
                     } else {
-                        await ApiHelper.addPostToSet(setDropdown.value, postId)
+                        await E6ApiHelper.addPostToSet(setDropdown.value, postId)
                     }
 
                     UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSetOption.innerText}'`);
@@ -95,7 +95,7 @@ class PostOverviewController {
                         const customSet = this.#getUserSetInstance().getSet(setDropdown.value);
                         await customSet.removePost(postId);
                     } else {
-                        await ApiHelper.removePostFromSet(setDropdown.value, postId)
+                        await E6ApiHelper.removePostFromSet(setDropdown.value, postId)
                     }
                     //Posts can't safely be hidden, because the user might delete them from a different set and not the one dispalyed right now
                     //postArticleElement.style.display = "none";
@@ -110,11 +110,11 @@ class PostOverviewController {
                     window.location.reload();
                     break;
                 case "add-fav":
-                    await ApiHelper.addPostToFavorites(postId);
+                    await E6ApiHelper.addPostToFavorites(postId);
                     UIHelper.displaySuccessMessage(`The post '${postId}' has been added to your favorites`);
                     break;
                 case "remove-fav":
-                    await ApiHelper.removePostFromFavorites(postId);
+                    await E6ApiHelper.removePostFromFavorites(postId);
                     UIHelper.displaySuccessMessage(`The post '${postId}' has been removed from your favorites`);
                     break;
             }

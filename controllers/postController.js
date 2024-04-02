@@ -24,8 +24,6 @@ class PostController {
         if (sets.length === 0)
             return;
 
-        this.#replaceSetQueryNavigator();
-
         const setNavBar = this.#getSetNavBar();
         sets.forEach(setInstance => {
             const setNavElement = this.#createSetNavElement(setInstance);
@@ -36,13 +34,6 @@ class PostController {
                 setNavBar.appendChild(setNavElement);
             }
         });
-    }
-
-    #replaceSetQueryNavigator() {
-        //Simply hide the set query for now because it can be very complicated especially when combining multiple offline sets
-        const noSetQueryNavigator = document.querySelector("#nav-links-top > div.search-seq-nav");
-        if (noSetQueryNavigator)
-            noSetQueryNavigator.style.display = "none";
     }
 
     #createSetNavElement(setInstance) {
@@ -182,7 +173,7 @@ class PostController {
                 const customSet = this.#getUserSetInstance().getSet(userSetDropdown.value);
                 await customSet.addPost(postId);
             } else {
-                await ApiHelper.addPostToSet(userSetDropdown.value, postId);
+                await E6ApiHelper.addPostToSet(userSetDropdown.value, postId);
             }
 
             UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSet.innerText}'`);

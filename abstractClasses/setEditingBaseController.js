@@ -7,8 +7,11 @@ class SetEditingBaseController extends SetBaseController {
             throw Error("No set ID was passed!");
 
         this._setInstance = new UserSets(UserHelper.getCurrentUserId()).getSet(setId);
-        if (!this._setInstance)
-            throw Error(`No offline set with the ID ${setId} was found!`);
+        if (!this._setInstance) {
+            const errorMessage = `No offline set with the ID ${setId} was found!`;
+            UIHelper.displayErrorMessage(errorMessage);
+            throw Error(errorMessage);
+        }
 
         this._addItemsToToolbar(this.#getSetEditingToolbarItems());
         this._createSetSpecificElements();

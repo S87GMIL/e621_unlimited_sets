@@ -16,7 +16,7 @@ class UserHelper {
         if (!userId)
             throw Error("User is not signed in!");
 
-        const userJson = await ApiHelper.getUserInformation(userId);
+        const userJson = await E6ApiHelper.getUserInformation(userId);
         return new User(userId, userJson);
     }
 
