@@ -7,7 +7,9 @@ Once installed, simply follow this [link](https://github.com/S87GMIL/e621_unlimi
 
 This user script allows you to create an unlimited amount of so-called "offline sets" These sets are only saved on your device and not the e6 servers.<br>
 Because nothing is saved on the e6 servers, it is possible to circumvent the imposed set limit, without breaching any site rules or exploiting the site's API.<br>
-This also means, that the offline sets created are only available on the device on which they were created, unless the user manually downloads a backup of the offline sets and uploads it to another device.<br><br>
+This also means, that the offline sets created are only available on the device on which they were created, unless the user manually downloads a backup of the offline sets and uploads it to another device, unless utilizing the GitHub integration.<br>
+The GitHub integration allows users to define a GitHub repository in which all changes made to the offline sets will be saved; this also allows the use of offline sets across multiple devices.
+<br><br>
 
 Usage of the offline sets should be as easy and intuitive as possible; this is why they are directly integrated in the standard set pages and will behave just like regular e6 sets.
 
