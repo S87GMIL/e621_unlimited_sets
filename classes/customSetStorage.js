@@ -158,12 +158,7 @@ class CustomSetStorage {
         customSets[setId].posts = [];
 
         updatedPosts.forEach(async postData => {
-            const createdPost = CustomSetStorage.createPostMetadata(postData.id, postData);
-
-            if (this.isPostAlreadyInSet(setId, postData.id))
-                throw Error(`The post '${postData.id}' has already been added to set '${customSets[setId].label}'`)
-
-            customSets[setId].posts.push(createdPost);
+            customSets[setId].posts.push(CustomSetStorage.createPostMetadata(postData.id, postData));
         })
 
         customSets[setId].changedOn = Date.now();
