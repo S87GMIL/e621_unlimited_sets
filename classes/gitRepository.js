@@ -123,7 +123,7 @@ class GitRepository {
 
     async loadSetsFromRepository() {
         const fileName = this.#createUserSetsFileName();
-        const response = await GitAPIHelper.getFileFromGit(
+        const response = await GitAPIHelper.getInstance().getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
             this.getRepositoryName(),
@@ -146,7 +146,7 @@ class GitRepository {
 
             const fileName = this.#createUserSetsFileName();
 
-            const response = await GitAPIHelper.createGithubCommit(
+            const response = await GitAPIHelper.getInstance().createGithubCommit(
                 this.getAccessToken(),
                 this.getUsername(),
                 this.getRepositoryName(),
@@ -168,7 +168,7 @@ class GitRepository {
     }
 
     async loadGitUserSets() {
-        const response = await GitAPIHelper.getFileFromGit(
+        const response = await GitAPIHelper.getInstance().getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
             this.getRepositoryName(),

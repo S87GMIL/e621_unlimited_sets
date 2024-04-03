@@ -1,6 +1,20 @@
 class GitAPIHelper {
 
-    static async createGithubCommit(githubAccessToken, gitUsername, repoName, branchName, commitMessage, offlineSetFile, fileName) {
+    constructor() {
+        if (GitAPIHelper._instance)
+            throw Error("Singleton classes can only be instantiated once!");
+
+        this._lastCommitSha = null;
+    }
+
+    static getInstance() {
+        if (!GitAPIHelper._instance)
+            GitAPIHelper._instance = new GitAPIHelper();
+
+        return GitAPIHelper._instance;
+    }
+
+    async createGithubCommit(githubAccessToken, gitUsername, repoName, branchName, commitMessage, offlineSetFile, fileName) {
         if (!githubAccessToken || !gitUsername || !repoName || !branchName || !offlineSetFile || !fileName)
             throw Error("No all mandatory parameters were passed!");
 
@@ -12,10 +26,12 @@ class GitAPIHelper {
             "tree": tree
         }
 
-        if (tree) {
-            const parentSha = await this.#getParentSha(githubAccessToken, repoFullName, branchName);
+        let parentSha = this._lastCommitSha;
+        if (!parentSha)
+            parentSha = await this.#getParentSha(githubAccessToken, repoFullName, branchName);
+
+        if (parentSha)
             payload.parents = [parentSha];
-        }
 
         const response = await this.#performCrossOriginRequest(
             "POST",
@@ -24,12 +40,12 @@ class GitAPIHelper {
             payload
         );
 
-        const commitSha = response.sha;
-        const updateResponse = await this.#updateGithubBranchRef(githubAccessToken, repoFullName, branchName, commitSha);
-        return updateResponse;
+        this._lastCommitSha = response.sha;
+        //const updateResponse = await this.#updateGithubBranchRef(githubAccessToken, repoFullName, branchName, this._lastCommitSha);
+        return response;
     }
 
-    static async getFileFromGit(githubAccessToken, gitUsername, repoName, branchName, fileName) {
+    async getFileFromGit(githubAccessToken, gitUsername, repoName, branchName, fileName) {
         const repoFullName = `${gitUsername}/${repoName}`;
 
         const response = await this.#performCrossOriginRequest(
@@ -41,7 +57,7 @@ class GitAPIHelper {
         return JSON.parse(atob(response.content));
     }
 
-    static #performCrossOriginRequest(method, url, headers = {}, body) {
+    #performCrossOriginRequest(method, url, headers = {}, body) {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
                 method: method,
@@ -65,7 +81,7 @@ class GitAPIHelper {
         });
     }
 
-    static #getApiHeaders(githubAccessToken) {
+    #getApiHeaders(githubAccessToken) {
         return {
             'Accept': 'application/vnd.github+json',
             'Authorization': `Bearer ${githubAccessToken}`,
@@ -73,7 +89,7 @@ class GitAPIHelper {
         };
     }
 
-    static async #createGithubFileBlob(githubAccessToken, repoFullName, offlineSetFile) {
+    async #createGithubFileBlob(githubAccessToken, repoFullName, offlineSetFile) {
         const blobResp = await this.#performCrossOriginRequest(
             "POST",
             `https://api.github.com/repos/${repoFullName}/git/blobs`,
@@ -87,17 +103,21 @@ class GitAPIHelper {
         return blobResp.sha;
     }
 
-    static async #getShaForBaseTree(githubAccessToken, repoFullName, branchName) {
+    async #getShaForBaseTree(githubAccessToken, repoFullName, branchName) {
+        if (this._repoBaseTree)
+            return this._repoBaseTree;
+
         const response = await this.#performCrossOriginRequest(
             "GET",
             `https://api.github.com/repos/${repoFullName}/git/trees/${branchName}`,
             this.#getApiHeaders(githubAccessToken)
         );
 
+        this._repoBaseTree = response.sha;
         return response.sha || null;
     }
 
-    static async #getParentSha(githubAccessToken, repoFullName, branchName) {
+    async #getParentSha(githubAccessToken, repoFullName, branchName) {
         const parentResp = await this.#performCrossOriginRequest(
             "GET",
             `https://api.github.com/repos/${repoFullName}/git/refs/heads/${branchName}`,
@@ -107,7 +127,7 @@ class GitAPIHelper {
         return parentResp?.object?.sha;
     }
 
-    static async #createGithubRepoTree(githubAccessToken, repoFullName, branchName, offlineSetFile, fileName) {
+    async #createGithubRepoTree(githubAccessToken, repoFullName, branchName, offlineSetFile, fileName) {
         let shaForBaseTree;
         shaForBaseTree = await this.#getShaForBaseTree(githubAccessToken, repoFullName, branchName);
 
@@ -137,7 +157,7 @@ class GitAPIHelper {
         return treeResp.sha;
     }
 
-    static async #updateGithubBranchRef(githubAccessToken, repoFullName, branchName, commitSha) {
+    async #updateGithubBranchRef(githubAccessToken, repoFullName, branchName, commitSha) {
         const payload = {
             "sha": commitSha,
             "force": false
