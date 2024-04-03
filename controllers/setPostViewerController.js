@@ -38,20 +38,26 @@ class SetPostViewerController {
         return this._userSetInstance;
     }
 
-    #getCustomSet() {
+    #getCustomSetIDs() {
         const filters = document.querySelector("#tags").value.split(" ");
-        const customsetIds = [];
-        filters.map(tag => {
+
+        let customSetIds = [];
+        filters.forEach(tag => {
             if (tag.startsWith("custom_set:"))
-                customsetIds.push(tag.substring(11, tag.length));
+                customSetIds.push(tag.substring(11, tag.length));
         });
 
-        if (customsetIds.length === 0)
+        return customSetIds;
+    }
+
+    #getCustomSet() {
+        const customSetIDs = this.#getCustomSetIDs();
+        if (customSetIDs.length === 0)
             return;
 
-        const setInstance = this.#getUserSetInstance().getSet(customsetIds[0]);
+        const setInstance = this.#getUserSetInstance().getSet(customSetIDs[0]);
         if (!setInstance)
-            UIHelper.displayErrorMessage(`No offline set found with the ID '${customsetIds[0]}'!`);
+            UIHelper.displayErrorMessage(`No offline set found with the ID '${customSetIDs[0]}'!`);
 
         return setInstance;
     }
@@ -83,7 +89,8 @@ class SetPostViewerController {
         postContainer.className = "post-preview post-status-has-parent post-rating-explicit";
 
         const postLink = document.createElement("a");
-        postLink.href = `/posts/${post.postId}`;
+        const customSetQueryString = this.#getCustomSetIDs().map(setId => `custom_set:${setId}`).join("+");
+        postLink.href = `/posts/${post.postId}?q=${customSetQueryString}`;
         postContainer.appendChild(postLink);
 
         const pictureContainer = document.createElement("picture");
@@ -161,10 +168,10 @@ class SetPostViewerController {
         filteredTags
             .filter(tag => tag.startsWith("custom_set:"))
             .forEach(customSetTag => {
-                const customsetId = customSetTag.split(":").pop();
-                const setInstance = this.#getUserSetInstance().getSet(customsetId);
+                const customSetId = customSetTag.split(":").pop();
+                const setInstance = this.#getUserSetInstance().getSet(customSetId);
                 if (!setInstance)
-                    UIHelper.displayErrorMessage(`No offline set found with the ID '${customsetId}'!`);
+                    UIHelper.displayErrorMessage(`No offline set found with the ID '${customSetId}'!`);
 
                 if (setInstance?.getPostAmount() > 0)
                     setPostIdArrays[setPostIdArrays.length] = setInstance.getPosts().map(post => post.postId);

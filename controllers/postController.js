@@ -17,9 +17,20 @@ class PostController {
         return customNavBar;
     }
 
-    #displayPostSets() {
-        const queriedSetId = new URLSearchParams(document.location.search).get("custom_set_id");
+    #getCustomSetIDs() {
+        const filters = document.querySelector("#tags").value.split(" ");
 
+        let customSetIds = [];
+        filters.forEach(tag => {
+            if (tag.startsWith("custom_set:"))
+                customSetIds.push(tag.substring(11, tag.length));
+        });
+
+        return customSetIds;
+    }
+
+    #displayPostSets() {
+        const queriedSetId = this.#getCustomSetIDs()[0];
         const sets = new UserSets(UserHelper.getCurrentUserId()).getSetsOfPost(this.#getCurrentPostId());
         if (sets.length === 0)
             return;
@@ -49,7 +60,7 @@ class PostController {
             firstAnchor = document.createElement('span');
         } else {
             firstAnchor = document.createElement('a');
-            firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?custom_set_id=${setInstance.getId()}`;
+            firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?q*custom_set:${setInstance.getId()}`;
         }
         firstAnchor.className = 'first';
         firstAnchor.title = 'to first';
@@ -61,7 +72,7 @@ class PostController {
             prevAnchor = document.createElement('span');
         } else {
             prevAnchor = document.createElement('a');
-            prevAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex - 1).postId}?custom_set_id=${setInstance.getId()}`;
+            prevAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex - 1).postId}?q=custom_set:${setInstance.getId()}`;
         }
         prevAnchor.className = 'prev';
         prevAnchor.textContent = '‹ prev';
@@ -81,7 +92,7 @@ class PostController {
         const totalPostCount = setInstance.getPostCount();
         if (currentPostIndex + 1 < totalPostCount) {
             nextAnchor = document.createElement('a');
-            nextAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex + 1).postId}?custom_set_id=${setInstance.getId()}`;
+            nextAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex + 1).postId}?q=custom_set:${setInstance.getId()}`;
         } else {
             nextAnchor = document.createElement('span');
         }
@@ -94,7 +105,7 @@ class PostController {
             lastAnchor = document.createElement('span');
         } else {
             lastAnchor = document.createElement('a');
-            lastAnchor.href = `/posts/${setInstance.getPostByIndex(totalPostCount - 1).postId}?custom_set_id=${setInstance.getId()}`;
+            lastAnchor.href = `/posts/${setInstance.getPostByIndex(totalPostCount - 1).postId}?q=custom_set:${setInstance.getId()}`;
         }
         lastAnchor.className = 'last';
         lastAnchor.title = 'to last';
