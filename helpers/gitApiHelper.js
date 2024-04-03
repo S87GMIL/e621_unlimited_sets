@@ -1,22 +1,28 @@
 class GitAPIHelper {
 
     constructor() {
-        if (GitAPIHelper._instance)
-            throw Error("Singleton classes can only be instantiated once!");
-
+        this._requestInProgress = false;
         this._lastCommitSha = null;
+
+        this._pendingRequest = null;
     }
 
-    static getInstance() {
-        if (!GitAPIHelper._instance)
-            GitAPIHelper._instance = new GitAPIHelper();
-
-        return GitAPIHelper._instance;
+    isRequestInProgress() {
+        return this._requestInProgress;
     }
 
     async createGithubCommit(githubAccessToken, gitUsername, repoName, branchName, commitMessage, offlineSetFile, fileName) {
         if (!githubAccessToken || !gitUsername || !repoName || !branchName || !offlineSetFile || !fileName)
             throw Error("No all mandatory parameters were passed!");
+
+        //Prevent multiple requests from being processes while another one is still pending => Because the whole file is committed, the last request will always contain the latest version of the file
+        if (this.isRequestInProgress()) {
+            this._pendingRequest = () => this.createGithubCommit(githubAccessToken, gitUsername, repoName, branchName, commitMessage, offlineSetFile, fileName);
+            return;
+        }
+
+        this._requestInProgress = true;
+        this._pendingRequest = null;
 
         const repoFullName = `${gitUsername}/${repoName}`;
         const tree = await this.#createGithubRepoTree(githubAccessToken, repoFullName, branchName, offlineSetFile, fileName);
@@ -41,8 +47,13 @@ class GitAPIHelper {
         );
 
         this._lastCommitSha = response.sha;
-        //const updateResponse = await this.#updateGithubBranchRef(githubAccessToken, repoFullName, branchName, this._lastCommitSha);
-        return response;
+        const updateResponse = await this.#updateGithubBranchRef(githubAccessToken, repoFullName, branchName, this._lastCommitSha);
+        this._requestInProgress = false;
+
+        if (this._pendingRequest)
+            await this._pendingRequest();
+
+        return updateResponse;
     }
 
     async getFileFromGit(githubAccessToken, gitUsername, repoName, branchName, fileName) {
