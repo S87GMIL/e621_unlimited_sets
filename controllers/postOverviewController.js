@@ -7,10 +7,6 @@ class PostOverviewController {
         this.#handleSelectedMode();
     }
 
-    #isDisplayingCustomSet() {
-        return document.querySelector("#tags").value.split(" ").some(tag => tag.startsWith("custom_set:"));
-    }
-
     #getUserSetInstance() {
         if (!this._userSets)
             this._userSets = new UserSets(UserHelper.getCurrentUserId());
@@ -26,7 +22,7 @@ class PostOverviewController {
     async #handleSelectedMode() {
         const modeDropdown = document.querySelector("#mode-box-mode");
         const selectedMode = modeDropdown.value;
-        if (!this.#isDisplayingCustomSet() && selectedMode !== "add-to-set" && selectedMode !== "remove-from-set")
+        if (selectedMode === "view")
             return;
 
         if (!this._postsReplaced) {
@@ -63,7 +59,10 @@ class PostOverviewController {
         const postContainer = document.querySelector("#posts-container");
         Array.from(postContainer.querySelectorAll("article")).forEach(postTile => {
             const postClone = postTile.cloneNode(true);
-            postClone.querySelector("a").href = "javascript: void(0)";
+            const postLink = postClone.querySelector("a");
+
+            postClone.dataset.originalUrl = postLink.href;
+            postLink.href = "javascript: void(0)";
 
             postTile.replaceWith(postClone);
             postClone.addEventListener("click", this.#onPostClicked.bind(this));
@@ -103,7 +102,7 @@ class PostOverviewController {
                     UIHelper.displaySuccessMessage(`The post '${postId}' has been removed from the set '${selectedSetOption.innerText}'`);
                     break;
                 case "view":
-                    window.location.assign(`https://e621.net/posts/${postId}`);
+                    window.location.assign(postArticleElement.dataset.originalUrl);
                     break;
                 case "edit":
                     //This required more work than I'm willing to invest right now, so I guess just reload and try again ...
