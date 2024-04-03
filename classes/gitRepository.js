@@ -14,6 +14,9 @@ class GitRepository {
     static POST_REMOVED_ACTION = "post_removed";
 
     constructor(userId) {
+        if (GitRepository._instance)
+            throw Error("Singleton classes can only be instantiated once!");
+
         if (!userId)
             throw Error("No user ID was passed!");
 
@@ -26,6 +29,19 @@ class GitRepository {
         this._branchName = gitSettings.branchName;
         this._accessToken = gitSettings.accessToken;
         this._gitBackupEnabled = gitSettings.gitEnabled;
+
+        this._gitApiInstance = new GitAPIHelper();
+    }
+
+    static getInstance() {
+        if (!GitRepository._instance)
+            GitRepository._instance = new GitRepository();
+
+        return GitRepository._instance;
+    }
+
+    #getGitApiInstance() {
+        return this._gitApiInstance;
     }
 
     #createGitUserSettingsKey() {
@@ -123,7 +139,7 @@ class GitRepository {
 
     async loadSetsFromRepository() {
         const fileName = this.#createUserSetsFileName();
-        const response = await GitAPIHelper.getFileFromGit(
+        const response = await this.#getGitApiInstance().getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
             this.getRepositoryName(),
@@ -146,7 +162,7 @@ class GitRepository {
 
             const fileName = this.#createUserSetsFileName();
 
-            const response = await GitAPIHelper.createGithubCommit(
+            const response = await this.#getGitApiInstance().createGithubCommit(
                 this.getAccessToken(),
                 this.getUsername(),
                 this.getRepositoryName(),
@@ -168,7 +184,7 @@ class GitRepository {
     }
 
     async loadGitUserSets() {
-        const response = await GitAPIHelper.getFileFromGit(
+        const response = await this.#getGitApiInstance().getFileFromGit(
             this.getAccessToken(),
             this.getUsername(),
             this.getRepositoryName(),
