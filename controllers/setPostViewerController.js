@@ -155,8 +155,6 @@ class SetPostViewerController {
     }
 
     #filterPosts(setInstance) {
-        //TODO: Implement a more advanced filter logic to filter the custom set posts!
-
         let posts = setInstance.getPosts();
         const filteredTags = document.querySelector("#tags").value.split(" ").filter(tag => tag !== `custom_set:${setInstance.getId()}` && !!tag);
 

@@ -3,6 +3,7 @@ class PostController {
     constructor() {
         this.#attachAddToSetHandler();
         this.#displayPostSets();
+        this.#replaceMainSearchNavigatorLinks();
     }
 
     #getSetNavBar() {
@@ -31,7 +32,7 @@ class PostController {
 
     #displayPostSets() {
         const queriedSetId = this.#getCustomSetIDs()[0];
-        const sets = new UserSets(UserHelper.getCurrentUserId()).getSetsOfPost(this.#getCurrentPostId());
+        const sets = this.#getUserSetInstance().getSetsOfPost(this.#getCurrentPostId());
         if (sets.length === 0)
             return;
 
@@ -60,7 +61,7 @@ class PostController {
             firstAnchor = document.createElement('span');
         } else {
             firstAnchor = document.createElement('a');
-            firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?q*custom_set:${setInstance.getId()}`;
+            firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?q=custom_set:${setInstance.getId()}`;
         }
         firstAnchor.className = 'first';
         firstAnchor.title = 'to first';
@@ -114,6 +115,54 @@ class PostController {
 
         ulElement.appendChild(liElement);
         return liElement;
+    }
+
+    #replaceMainSearchNavigatorLinks() {
+        const customSetIds = this.#getCustomSetIDs();
+        if (customSetIds.length === 0)
+            return;
+
+        const postIdArrays = customSetIds.map(setId => this.#getUserSetInstance().getSet(setId).getPosts().map(post => post.postId));
+
+        const commonPostIds = new Set(postIdArrays[0]);
+        for (let index = 0; index < postIdArrays.length; index++) {
+            const currentArray = postIdArrays[index];
+            commonPostIds.forEach(postId => {
+                if (!currentArray.includes(postId)) {
+                    commonPostIds.delete(postId);
+                }
+            });
+        }
+
+        const commonPostsArray = Array.from(commonPostIds);
+        const currentIndex = commonPostsArray.indexOf(this.#getCurrentPostId());
+
+        const customSetQueryString = this.#getCustomSetIDs().map(setId => `custom_set:${setId}`).join("+");
+
+        const queryNavigator = document.querySelector("#nav-links-top").querySelector(".search-name").parentElement;
+        const previousPostLink = queryNavigator.querySelector(".prev");
+        const nextPostLink = queryNavigator.querySelector(".next");
+
+        if (currentIndex > 0) {
+            previousPostLink.href = `/posts/${commonPostsArray[currentIndex - 1]}?q=${customSetQueryString}`;
+        } else {
+            const previousSpan = document.createElement("span");
+            previousSpan.innerText = previousPostLink.innerText;
+            previousSpan.className = previousPostLink.className;
+
+            previousPostLink.replaceWith(previousSpan);
+        }
+
+        if (currentIndex < commonPostsArray.length - 1) {
+            nextPostLink.href = `/posts/${commonPostsArray[currentIndex + 1]}?q=${customSetQueryString}`;
+        } else {
+            const nextSpan = document.createElement("span");
+            nextSpan.innerText = nextPostLink.innerText;
+            nextSpan.className = nextPostLink.className;
+
+            nextPostLink.replaceWith(nextSpan);
+        }
+
     }
 
     #getUserSetInstance() {

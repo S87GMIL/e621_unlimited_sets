@@ -7,10 +7,6 @@ class PostOverviewController {
         this.#handleSelectedMode();
     }
 
-    #isDisplayingCustomSet() {
-        return document.querySelector("#tags").value.split(" ").some(tag => tag.startsWith("custom_set:"));
-    }
-
     #getUserSetInstance() {
         if (!this._userSets)
             this._userSets = new UserSets(UserHelper.getCurrentUserId());
