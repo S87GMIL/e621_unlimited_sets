@@ -57,7 +57,7 @@ class E6ApiHelper {
                 post_ids: [postId]
             });
         if (!response || !response.name)
-            throw Error(`Post '${postId}' could not be adde to set '${setId}'!`);
+            throw Error(`Post '${postId}' could not be added to set '${setId}'!`);
 
         return response;
     }
