@@ -43,7 +43,7 @@ class User {
         return await E6ApiHelper.loadPost(this.getAvatarId());
     }
 
-    canRepalcePosts() {
+    canReplacePosts() {
         return this._userJson.replacements_beta;
     }
 

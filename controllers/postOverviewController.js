@@ -94,7 +94,7 @@ class PostOverviewController {
                         const customSet = this.#getUserSetInstance().getSet(setDropdown.value);
                         await customSet.removePost(postId);
                     } else {
-                        await E6ApiHelper.removePostFromSet(setDropdown.value, postId)
+                        await E6ApiHelper.removePostFromSet(setDropdown.value, postId);
                     }
                     //Posts can't safely be hidden, because the user might delete them from a different set and not the one dispalyed right now
                     //postArticleElement.style.display = "none";
