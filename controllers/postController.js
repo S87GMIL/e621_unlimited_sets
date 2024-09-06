@@ -63,7 +63,7 @@ class PostController {
             firstAnchor = document.createElement('a');
             firstAnchor.href = `/posts/${setInstance.getPostByIndex(0).postId}?q=custom_set:${setInstance.getId()}`;
         }
-        firstAnchor.className = 'first';
+        firstAnchor.className = 'nav-link first';
         firstAnchor.title = 'to first';
         firstAnchor.textContent = '« first';
         liElement.appendChild(firstAnchor);
@@ -75,12 +75,12 @@ class PostController {
             prevAnchor = document.createElement('a');
             prevAnchor.href = `/posts/${setInstance.getPostByIndex(currentPostIndex - 1).postId}?q=custom_set:${setInstance.getId()}`;
         }
-        prevAnchor.className = 'prev';
+        prevAnchor.className = 'nav-link prev';
         prevAnchor.textContent = '‹ prev';
         liElement.appendChild(prevAnchor);
 
         const spanElement = document.createElement('span');
-        spanElement.className = 'set-name';
+        spanElement.className = 'nav-name';
 
         const setNameAnchor = document.createElement('a');
         setNameAnchor.href = `/custom_sets/${setInstance.getId()}`;
@@ -97,7 +97,7 @@ class PostController {
         } else {
             nextAnchor = document.createElement('span');
         }
-        nextAnchor.className = 'next';
+        nextAnchor.className = 'nav-link next';
         nextAnchor.textContent = 'next ›';
         liElement.appendChild(nextAnchor);
 
@@ -108,13 +108,13 @@ class PostController {
             lastAnchor = document.createElement('a');
             lastAnchor.href = `/posts/${setInstance.getPostByIndex(totalPostCount - 1).postId}?q=custom_set:${setInstance.getId()}`;
         }
-        lastAnchor.className = 'last';
+        lastAnchor.className = 'nav-link last';
         lastAnchor.title = 'to last';
         lastAnchor.textContent = 'last »';
         liElement.appendChild(lastAnchor);
 
         ulElement.appendChild(liElement);
-        return liElement;
+        return ulElement;
     }
 
     #replaceMainSearchNavigatorLinks() {
