@@ -12,7 +12,7 @@ class PostController {
             return setNavBar;
 
         const customNavBar = document.createElement("div");
-        customNavBar.className = "set-nav";
+        customNavBar.className = "nav-block set-nav navBlock";
         document.querySelector("#nav-links-top").appendChild(customNavBar);
 
         return customNavBar;
@@ -138,7 +138,7 @@ class PostController {
         const currentIndex = commonPostsArray.indexOf(this.#getCurrentPostId());
 
         const customSetQueryString = this.#getCustomSetIDs().map(setId => `custom_set:${setId}`).join("+");
-        
+
         const queryNavigator = document.querySelector("#nav-links-top").querySelector(".nav-name").parentElement;
         const previousPostLink = queryNavigator.querySelector(".prev");
         const nextPostLink = queryNavigator.querySelector(".next");
