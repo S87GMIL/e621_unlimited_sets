@@ -69,7 +69,7 @@ class SetPostViewerController {
             return;
         }
 
-        const postsContainer = document.querySelector("#posts-container");
+        const postsContainer = document.getElementById("posts").getElementsByClassName("posts-container")[0];
         postsContainer.innerHTML = "";
 
         const userInstance = await this.#getUser();
