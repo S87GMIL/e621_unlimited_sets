@@ -31,7 +31,7 @@ class SetBaseController {
     }
 
     _addItemsToToolbar(items) {
-        const menu = document.querySelector("#nav > menu.secondary");
+        const menu = document.querySelector("body > nav > menu.nav-secondary.desktop");
         if (!this._menuCleared)
             menu.innerHTML = "";
 
