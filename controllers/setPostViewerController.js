@@ -107,10 +107,10 @@ class SetPostViewerController {
     #displayPages(pageAmount, currentPage) {
         const urlSearchParams = new URLSearchParams(document.location.search);
 
-        const pageMenu = document.querySelector("#posts > div.paginator > menu");
+        const pageMenu = document.querySelector("#posts > nav");
         pageMenu.innerHTML = "";
 
-        const leftArrow = document.createElement("li");
+        const leftArrow = document.createElement("span");
         pageMenu.appendChild(leftArrow);
         const leftArrowLink = document.createElement("a");
         urlSearchParams.set("page", currentPage > 1 ? currentPage - 1 : 1);
@@ -122,7 +122,7 @@ class SetPostViewerController {
 
         for (let page = 0; page < pageAmount; page++) {
 
-            const pageNumber = document.createElement("li");
+            const pageNumber = document.createElement("span");
 
             if (page + 1 === currentPage) {
                 pageNumber.className = "current-page";
@@ -143,7 +143,7 @@ class SetPostViewerController {
             pageMenu.appendChild(pageNumber);
         }
 
-        const rightArrow = document.createElement("li");
+        const rightArrow = document.createElement("span");
         pageMenu.appendChild(rightArrow);
         const rightArrowLink = document.createElement("a");
         urlSearchParams.set("page", currentPage < pageAmount ? currentPage + 1 : currentPage);
