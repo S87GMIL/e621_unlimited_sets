@@ -204,6 +204,10 @@ class PostController {
                 setOptionElement.dataset.isCustomSet = true;
                 customSetGroup.appendChild(setOptionElement);
             });
+
+        const lastSelectedSetId = StorageHelper.getValue("lastSelectedSetId");
+        if (lastSelectedSetId)
+            userSetDropdown.value = lastSelectedSetId;
     }
 
     #waitUntilSetsAreLoaded(setDropdown) {
@@ -228,6 +232,8 @@ class PostController {
             const userSetDropdown = document.querySelector("#add-to-set-id");
             const selectedSet = userSetDropdown.options[userSetDropdown.selectedIndex];
             const postId = this.#getCurrentPostId();
+
+            StorageHelper.saveValue("lastSelectedSetId", userSetDropdown.value);
 
             if (selectedSet.dataset.isCustomSet) {
                 const customSet = this.#getUserSetInstance().getSet(userSetDropdown.value);
