@@ -177,7 +177,7 @@ class PostController {
     }
 
     #attachAddToSetHandler() {
-        const addToSetButton = document.querySelector("#set");
+        const addToSetButton = document.querySelector("#add-to-set-list > a");
         addToSetButton.addEventListener("click", this.#onAddToSetBtnClick.bind(this));
 
         const confirmAddToSetBtn = document.querySelector("#add-to-set-submit");
@@ -245,7 +245,7 @@ class PostController {
             UIHelper.displaySuccessMessage(`The post '${postId}' has been added to the set '${selectedSet.innerText}'`);
 
             //Close the dialog by simply clicking on the close button
-            document.querySelector("#ui-id-5").parentElement.querySelector("button").click()
+            document.querySelector("#dialog-container > div:nth-child(2) > div.dialog-header > button").click()
         } catch (error) {
             UIHelper.displayErrorMessage(error.message);
         }

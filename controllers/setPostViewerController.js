@@ -86,7 +86,12 @@ class SetPostViewerController {
     #createPostItem(post) {
         const postContainer = document.createElement("article");
         postContainer.dataset.id = post.postId;
-        postContainer.className = "post-preview post-status-has-parent post-rating-explicit";
+        postContainer.className = "thumbnail rating-explicit";
+        postContainer.dataset.fileUrl = post.file.url;
+        postContainer.dataset.sampleUrl = post.preview.url;
+        postContainer.dataset.previewUrl = post.preview.url;
+        postContainer.dataset.previewWidth = "256";
+        postContainer.dataset.previewHeight = "309";
 
         const postLink = document.createElement("a");
         const customSetQueryString = this.#getCustomSetIDs().map(setId => `custom_set:${setId}`).join("+");
