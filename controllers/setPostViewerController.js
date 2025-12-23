@@ -94,6 +94,7 @@ class SetPostViewerController {
         postContainer.dataset.previewHeight = "309";
 
         const postLink = document.createElement("a");
+        postLink.className = "thm-link";
         const customSetQueryString = this.#getCustomSetIDs().map(setId => `custom_set:${setId}`).join("+");
         postLink.href = `/posts/${post.postId}?q=${customSetQueryString}`;
         postContainer.appendChild(postLink);
