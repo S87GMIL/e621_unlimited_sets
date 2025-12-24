@@ -8,6 +8,17 @@ class CustomSetStorage {
 
         this._userId = userId;
         this._gitRepoInstance = new GitRepository(userId);
+
+        this.#addGlobalWindowAPI();
+    }
+
+    #addGlobalWindowAPI() {
+        if (!Window.S87OfflineSetAPI)
+            Window.S87OfflineSetAPI = {
+                getUserSets: this.getUserSets.bind(this),
+                getUserSet: this.getUserSet.bind(this),
+                addPostToSet: this.addPostToSet.bind(this)
+            }
     }
 
     #createUserSetsKey() {
