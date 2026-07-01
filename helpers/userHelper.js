@@ -1,11 +1,11 @@
 class UserHelper {
 
     static getCurrentUserId() {
-        return document.querySelector('meta[name="current-user-id"]').content;
+        return document.body.getAttribute("data-user-id");
     }
 
     static getCurrentUserName() {
-        return document.querySelector('meta[name="current-user-name"]').content;
+        return document.body.getAttribute("data-user-name");
     }
 
     static async getUserInstance(userId) {
