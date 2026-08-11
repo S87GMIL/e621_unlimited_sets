@@ -8,6 +8,11 @@ class UIHelper {
 
     static #displayNotice(type, message, fadeAfter, isHtmlMessage = false) {
         let noticeElement = this.#getNoticeElemente();
+        if(!noticeElement){
+            console.error("Couldn't find notice element");
+            return;
+        }
+        
         noticeElement.classList.remove(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-error" : "ui-state-highlight");
         noticeElement.classList.add(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-highlight" : "ui-state-error");
 
