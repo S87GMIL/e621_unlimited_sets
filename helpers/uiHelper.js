@@ -7,23 +7,11 @@ class UIHelper {
     }
 
     static #displayNotice(type, message, fadeAfter, isHtmlMessage = false) {
-        let noticeElement = this.#getNoticeElemente();
-        noticeElement.classList.remove(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-error" : "ui-state-highlight");
-        noticeElement.classList.add(type === UIHelper.SUCCESS_NOTICE_TYPE ? "ui-state-highlight" : "ui-state-error");
-
-        noticeElement.style.display = "block";
-        const messageSpan = noticeElement.querySelector("span");
-
-        if (isHtmlMessage) {
-            messageSpan.innerHTML = message;
+        if (type === UIHelper.SUCCESS_NOTICE_TYPE) {
+            Danbooru.Flash.notice(message);
         } else {
-            messageSpan.innerText = message;
+            Danbooru.Flash.error(message)
         }
-
-        if (fadeAfter !== -1)
-            setTimeout(() => {
-                noticeElement.style.display = "none";
-            }, fadeAfter * 1000);
     }
 
     static displaySuccessMessage(message, fadeAfter = 10, isHtmlMessage) {

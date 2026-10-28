@@ -180,7 +180,7 @@ class PostController {
         const addToSetButton = document.querySelector("#add-to-set-list > a");
         addToSetButton.addEventListener("click", this.#onAddToSetBtnClick.bind(this));
 
-        const confirmAddToSetBtn = document.querySelector("#add-to-set-submit");
+        const confirmAddToSetBtn = document.querySelector("#add-to-set-dialog > div.input.dialog-submit > button.st-button.submit");
         const confirmButtonClone = confirmAddToSetBtn.cloneNode(true);
         confirmAddToSetBtn.replaceWith(confirmButtonClone);
 
