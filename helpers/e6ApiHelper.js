@@ -2,10 +2,16 @@ class E6ApiHelper {
 
     static async #performRequest(method, path, body = {}) {
         return new Promise((resolve, reject) => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const requestBody = { ...body };
+
+            if (csrfToken && ["POST", "PATCH", "DELETE"].includes(method))
+                requestBody.authenticity_token = csrfToken;
+
             let settings = {
                 type: method,
                 url: path,
-                data: body,
+                data: requestBody,
                 success: response => {
                     this._lastRequestTime = new Date().getTime();
                     resolve(response);
@@ -35,12 +41,46 @@ class E6ApiHelper {
         return this.#performRequest("PATCH", path, data)
     }
 
+    static #normalizePost(post) {
+        if (!post)
+            return post;
+
+        if (post.post)
+            post = post.post;
+
+        if (!post.files)
+            return post;
+
+        const original = post.files.original || {};
+        const preview = post.files.preview || {};
+        const sample = post.files.sample || {};
+
+        return {
+            ...post,
+            file: {
+                width: original.width,
+                height: original.height,
+                url: original.url
+            },
+            preview: {
+                width: preview.width,
+                height: preview.height,
+                url: preview.jpg || preview.webp || null
+            },
+            sample: {
+                width: sample.width,
+                height: sample.height,
+                url: sample.jpg || sample.webp || null
+            }
+        };
+    }
+
     static async getPost(postId) {
-        const postResponse = await this.#performGetRequest(`https://e621.net/posts/${postId}.json`);
+        const postResponse = await this.#performGetRequest(`https://e621.net/posts/${postId}.json?mode=extended`);
         if (!postResponse)
             throw Error(`No post with the ID '${postId}' could be found!`);
 
-        return postResponse.post;
+        return this.#normalizePost(postResponse);
     }
 
     static async getUserInformation(userId) {
@@ -54,7 +94,7 @@ class E6ApiHelper {
     static async addPostToSet(setId, postId) {
         const response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/add_posts.json`,
             {
-                post_ids: [postId]
+                "post_ids[]": [postId]
             });
         if (!response || !response.name)
             throw Error(`Post '${postId}' could not be added to set '${setId}'!`);
@@ -65,7 +105,7 @@ class E6ApiHelper {
     static async removePostFromSet(setId, postId) {
         const response = await this.#performPostRequest(`https://e621.net/post_sets/${setId}/remove_posts.json`,
             {
-                post_ids: [postId]
+                "post_ids[]": [postId]
             });
         if (!response || !response.name)
             throw Error(`Post '${postId}' could not be removed from the set '${setId}'!`);
@@ -89,18 +129,26 @@ class E6ApiHelper {
     }
 
     static async loadBulkPost(postIds, batch = 0, batchSize = 100) {
-        const requestPostIds = postIds.slice(batch * batchSize, (batch * batchSize + batchSize) - 1);
+        batchSize = Math.min(batchSize, 320);
+        const start = batch * batchSize;
+        const requestPostIds = postIds.slice(start, start + batchSize);
 
         if (requestPostIds.length === 0)
             return [];
 
-        const response = await this.#performGetRequest(`https://e621.net/posts.json?tags=id:${postIds.join(",")}`);
-        if (!response || !response.posts)
+        const encodedPostIds = encodeURIComponent(requestPostIds.join(","));
+        const response = await this.#performGetRequest(`https://e621.net/posts.json?search[id]=${encodedPostIds}&limit=${batchSize}&mode=extended`);
+        if (!response)
             throw Error(`Posts couldn't be loaded in bulk!`);
 
-        let loadedPosts = response.posts;
-        loadedPosts = loadedPosts.concat(await E6ApiHelper.loadBulkPost(requestPostIds, batch + 1, batchSize));
+        const loadedPosts = Array.isArray(response)
+            ? response
+            : (Array.isArray(response.posts) ? response.posts : []);
+        const normalizedPosts = loadedPosts.map(post => this.#normalizePost(post));
 
-        return loadedPosts;
+        if (start + batchSize < postIds.length)
+            normalizedPosts.push(...await E6ApiHelper.loadBulkPost(postIds, batch + 1, batchSize));
+
+        return normalizedPosts;
     }
 }
