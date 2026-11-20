@@ -177,7 +177,7 @@ class PostController {
     }
 
     #attachAddToSetHandler() {
-        const addToSetButton = document.querySelector(".add-to-set.button");
+        const addToSetButton = document.querySelector(".add-to-set");
         addToSetButton.addEventListener("click", this.#onAddToSetBtnClick.bind(this));
 
         const confirmAddToSetBtn = document.querySelector("#add-to-set-dialog > div.input.dialog-submit > button.st-button.submit");
