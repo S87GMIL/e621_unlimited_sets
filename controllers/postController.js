@@ -178,6 +178,21 @@ class PostController {
 
     #attachAddToSetHandler() {
         const addToSetButton = document.querySelector(".add-to-set");
+
+        if (!addToSetButton) {
+            addToSetButton = document.evaluate(
+                "//a[text()='Add to set']",
+                document,
+                null,
+                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                null);
+
+            if (!addToSetButton) {
+                console.error("Unable to find the 'Add to set' link to inject custom sets in the set list");
+                return;
+            }
+        }
+
         addToSetButton.addEventListener("click", this.#onAddToSetBtnClick.bind(this));
 
         const confirmAddToSetBtn = document.querySelector("#add-to-set-dialog > div.input.dialog-submit > button.st-button.submit");
